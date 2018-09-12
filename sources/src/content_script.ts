@@ -10,7 +10,7 @@
 import { fromEvent } from 'rxjs';
 import { bufferTime, filter, map, pairwise, startWith } from 'rxjs/operators';
 
-const distance = fromEvent(document, 'mousemove')
+const distance$ = fromEvent(document, 'mousemove')
     .pipe(
         startWith(null),
         pairwise(),
@@ -23,21 +23,23 @@ const distance = fromEvent(document, 'mousemove')
                 currX: curr.pageX,
             }
         )),
+        filter(({
+            prevX, prevY, currY, currX
+        }) => Math.abs(prevX - currX) < 300 || Math.abs(prevY - currY) < 300),
         map(({prevX, prevY, currX, currY}) => (
             Math.sqrt(
                 Math.pow((currX - prevX), 2) + Math.pow((currY - prevY), 2)
             )
         )),
-        // scan((acc, value) => acc + value, 0),
         map(v => v * 0.02645833),
-        // map(Math.round)
+        filter(v => v > 0)
     )
     
 // const clicks = fromEvent(document, 'click');
 // const result = clicks.pipe(audit(ev => interval(1000)));
 // result.subscribe(x => console.log(x));
 // const int = interval(1000)
-const $distDistinct = distance.pipe(
+const $distDistinct = distance$.pipe(
     bufferTime(5000),
     map(v => v.reduce((a, c) => a + c, 0)),
     filter(v => v > 0),

@@ -6,7 +6,6 @@ import {
 
 type Handler = (message: any, sender: any, sendResponse: (response: any) => void) => void;
 
-// const storageCurry = chrome.storage.local.get
 const getStorage$ = bindCallback<string, {path: number}>(chrome.storage.local.get);
 
 
@@ -18,18 +17,19 @@ const message$ = fromEventPattern(
     map(({ message }) => message)
 )
 
-message$.pipe( 
-    mergeMap( 
-        _ => getStorage$('path'), 
-        (sendedPath, localPath) => sendedPath.path + localPath.path
-    ) 
-)
-.subscribe(
-    path => chrome.storage.local.set({
-        path,
-        unit: 'cm'
-    })
-)
+message$
+    .pipe( 
+        mergeMap( 
+            _ => getStorage$('path'), 
+            (sendedPath, localPath) => sendedPath.path + localPath.path
+        ) 
+    )
+    .subscribe(
+        path => chrome.storage.local.set({
+            path,
+            unit: 'cm'
+        })
+    )
 // merge(
 //     message$,
 //     get$
