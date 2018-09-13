@@ -1,8 +1,5 @@
-import { bindCallback, combineLatest, forkJoin, fromEventPattern, merge } from 'rxjs';
-import {
-    bufferTime, distinctUntilChanged, filter, map, mergeAll, mergeMap, pairwise, startWith,
-    subscribeOn, switchMap
-} from 'rxjs/operators';
+import { bindCallback, fromEventPattern } from 'rxjs';
+import { map,  mergeMap } from 'rxjs/operators';
 
 type Handler = (message: any, sender: any, sendResponse: (response: any) => void) => void;
 
@@ -21,7 +18,7 @@ message$
     .pipe( 
         mergeMap( 
             _ => getStorage$('path'), 
-            (sendedPath, localPath) => sendedPath.path + localPath.path
+            (sendedPath, localPath) => sendedPath.path + (localPath.path || 0)
         ) 
     )
     .subscribe(
