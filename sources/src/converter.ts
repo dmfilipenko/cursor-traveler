@@ -1,12 +1,18 @@
-import { curry } from 'ramda';
+import { curry, cond, equals } from 'ramda';
+enum Units {
+  CENTIMETER = 'cm',
+  METER = 'm',  
+  KILOMETR = 'km',
+  INCH = 'in',
+  FOOT = 'ft',
+  YARD = 'yd',
+  MILE = 'ml',
+}
 
-const CENTIMETER = 'cm'
-const METER = 'm'
-const KILOMETR = 'km'
-const INCH = 'in'
-const FOOT = 'ft'
-const yard = 'yd'
-const MILE = 'ml'
+interface Store {
+  path: number;
+  unit: Units;
+}
 
 const cmToM = (cm: number) => 0.01 * cm
 const mToKm = (m: number) => 0.001 * m
@@ -21,6 +27,25 @@ const isMoreThenHundredThousand = curryMoreThan(10 ** 5)
 const isMoreThenMillion = curryMoreThan(10 ** 6)
 const isMoreThenMilliard = curryMoreThan(10 ** 9)
 
+const convertToDifferentUnitMetric = (store: Store): Store => {
+  const { path, unit } = store
+  if (unit === Units.CENTIMETER) {
+    return {
+      unit: Units.METER,
+      path: cmToM(path)
+    }
+  } else if (unit === Units.METER) {
+    return {
+      unit: Units.KILOMETR,
+      path: mToKm(path)
+    }
+  }
+  return store
+}
+
+// const a = cond(
+//   [equals(Units.CENTIMETER), always()]
+// )
 // const convertToMeter = (data) => {
 //     if (cmToM(data.path) >= 1) {
 //         return {
