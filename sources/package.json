@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/chrome": "~0.0.72",
+    "@types/ramda": "^0.25.38",
     "@types/rx": "^4.1.1",
     "ts-loader": "~5.0.0",
     "typescript": "~3.0.3",
