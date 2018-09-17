@@ -25,7 +25,8 @@ import {
     flatMap,
     switchAll,
     tap,
-    mergeAll, 
+    mergeAll,
+    repeat, 
 } from 'rxjs/operators';
 import { map as mapIterate, values, pipe as pipeR, flatten } from 'ramda';
 type Handler = (message: any, sender: any, sendResponse: (response: any) => void) => void;
@@ -86,59 +87,47 @@ const message$ = fromEventPattern(
 //         map(unit => [path, unit])
 //     )),
 // )
-const promiseGetValue = params => new Promise(res => chrome.storage.local.get(params, res));
-let path$ = () => from(promiseGetValue('path')).pipe(map(({path}) => path))
-let unit$ = () => from(promiseGetValue('unit')).pipe(map(({unit}) => unit))
-let merged$ = message$.pipe(
-    switchMap(
-        messagePath => path$().pipe(map(localPath => [messagePath, localPath]))
-    ),
-    switchMap(
-        pathes => unit$().pipe(map(unit => [...pathes, unit]))
-    )
-)//.pipe(
-//     mergeAll()
-// )
-
-
-
-// const merged$ = message$.pipe(
-//     switchMap(sendedPath => 
-//         pathLocal$
+// const promiseGetValue = params => new Promise(res => chrome.storage.local.get(params, res));
+const path$ = Observable.create(function(observer) {
+    chrome.storage.local.get('path', observer.next.bind(observer))
+}).pipe(
+    map(({path}) => path || 0),
+    repeat()
+)
+const unit$ = Observable.create(function(observer) {
+    chrome.storage.local.get('unit', observer.next.bind(observer))
+}).pipe(
+    map(({ unit }) => unit || 0),
+    repeat()
+)
+// const unit$ = () => from(promiseGetValue('unit'))
+const merged$ = combineLatest(
+    path$,
+    unit$,
+    message$,
+)
+//     // switchMap(
+//     //     messagePath => path$().pipe(map(localPath => [messagePath, localPath]))
+//     // ),
+//     // switchMap(
+//     //     pathes => unit$().pipe(map(unit => [...pathes, unit]))
+//     // )
+//     withLatestFrom(
+       
 //     )
 // )
-//     ,
-//     path$,
-//     unit$,
-//     // map(flatten)
-// )
 
-// map(
-    //     pipeR(
-    //         mapIterate(values),
-    //         flatten,
-    //     )
-    // ),
 
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-// path$.subscribe(console.log)
-merged$.subscribe(a => {
-//     // tslint: ignore
-//     (a)
-//     // console.log(flatten(a))
-    let [messagePath, localPath, unit] = a;
+
+merged$.subscribe((a: number[]) => {
+    // tslint: ignore
+    
+    // console.log(flatten(a))
+    // let [messagePath, localPath, unit] = a;
     // console.log(messagePath + (localPath || 0))
     chrome.storage.local.set({
-        path: messagePath + (localPath || 0),
-        unit: unit
+        path: a[0] + (a[2] || 0),
+        unit: a[1]
     })
 })
 merged$.subscribe(console.log)
