@@ -7,8 +7,3 @@ export enum Units {
   YARD = 'yd',
   MILE = 'ml',
 }
-
-export interface Store {
-  path: number;
-  unit: Units;
-}
