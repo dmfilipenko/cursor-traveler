@@ -13,6 +13,7 @@ import {
     pluck,
 } from 'rxjs/operators';
 import { map as mapIterate, values, pipe as pipeR, flatten } from 'ramda';
+import {Units } from './enums'
 type Handler = (message: any, sender: any, sendResponse: (response: any) => void) => void;
 
 const message$ = fromEventPattern(
@@ -32,7 +33,7 @@ const unit$ = Observable.create(function(observer) {
     chrome.storage.local.get('unit', observer.next.bind(observer))
 }).pipe(
     pluck('unit'),
-    map(unit => unit || 0),
+    map(unit => unit || Units.CENTIMETER),
 )
 // const unit$ = () => from(promiseGetValue('unit'))
 const merged$ = message$.pipe(
@@ -48,7 +49,8 @@ const merged$ = message$.pipe(
 merged$.subscribe((a: number[]) => {
     const [sendedPath, localPath, unit] = a;
     chrome.storage.local.set({
-        path: sendedPath + localPath
+        path: sendedPath + localPath,
+        unit
     })
 })
 // merged$.subscribe(console.log)

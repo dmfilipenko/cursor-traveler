@@ -1,19 +1,10 @@
 import { curry, cond, equals } from 'ramda';
-enum Units {
-  CENTIMETER = 'cm',
-  METER = 'm',  
-  KILOMETR = 'km',
-  INCH = 'in',
-  FOOT = 'ft',
-  YARD = 'yd',
-  MILE = 'ml',
-}
+import { Units } from './enums'
 
 interface Store {
   path: number;
   unit: Units;
 }
-
 const cmToM = (cm: number) => 0.01 * cm
 const mToKm = (m: number) => 0.001 * m
 
