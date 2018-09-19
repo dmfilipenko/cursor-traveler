@@ -1,19 +1,10 @@
-/* tslint:disable */ 
-import { 
-    fromEventPattern, 
-    Observable,
-    combineLatest,
-} from 'rxjs';
-import { 
-    map, 
-    concat,
-    withLatestFrom,
-    tap,
-    switchMap,
-    pluck,
-} from 'rxjs/operators';
-import { map as mapIterate, values, pipe as pipeR, flatten } from 'ramda';
-import {Units } from './enums'
+import { flatten, map as mapIterate, pipe as pipeR, values } from 'ramda';
+/* tslint:disable */
+import { combineLatest, fromEventPattern, Observable } from 'rxjs';
+import { concat, map, pluck, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+
+import { Units } from '../types/enums';
+
 type Handler = (message: any, sender: any, sendResponse: (response: any) => void) => void;
 
 const message$ = fromEventPattern(
@@ -29,17 +20,16 @@ const path$ = Observable.create(function(observer) {
     pluck('path'),
     map(path => path || 0),
 )
-const unit$ = Observable.create(function(observer) {
-    chrome.storage.local.get('unit', observer.next.bind(observer))
-}).pipe(
-    pluck('unit'),
-    map(unit => unit || Units.CENTIMETER),
-)
+// const unit$ = Observable.create(function(observer) {
+//     chrome.storage.local.get('unit', observer.next.bind(observer))
+// }).pipe(
+//     pluck('unit'),
+//     map(unit => unit || Units.CENTIMETER),
+// )
 // const unit$ = () => from(promiseGetValue('unit'))
 const merged$ = message$.pipe(
-   switchMap(sendedPath => combineLatest(
+   switchMap(sendedPath => path$(
         path$,
-        unit$
     ).pipe(
         map(([path, unit]) => [sendedPath, path, unit]))
     )
@@ -47,10 +37,9 @@ const merged$ = message$.pipe(
 
 
 merged$.subscribe((a: number[]) => {
-    const [sendedPath, localPath, unit] = a;
+    const [sendedPath, localPath] = a;
     chrome.storage.local.set({
-        path: sendedPath + localPath,
-        unit
+        path: sendedPath + localPath
     })
 })
 // merged$.subscribe(console.log)
