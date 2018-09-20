@@ -43,7 +43,6 @@ const $distDistinct = distance$.pipe(
     bufferTime(5000),
     map(v => v.reduce((a, c) => a + c, 0)),
     filter(v => v > 0),
-    map(v => ({ path: v }))
 )
 // $distDistinct.subscribe(console.log)
 $distDistinct.subscribe(chrome.runtime.sendMessage)
@@ -53,6 +52,8 @@ $distDistinct.subscribe(chrome.runtime.sendMessage)
 //     timer(1000)
 // )
     // 
+
+    
 // document.addEventListener('mousemove', e => {
 //     const { pageX, pageY } = e
 //     if (start) {

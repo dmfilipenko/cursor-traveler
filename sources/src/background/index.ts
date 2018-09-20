@@ -1,10 +1,10 @@
 import { flatten, map as mapIterate, pipe as pipeR, values } from 'ramda';
 /* tslint:disable */
-import { combineLatest, fromEventPattern, Observable } from 'rxjs';
+import { combineLatest, fromEventPattern, Observable, bindCallback } from 'rxjs';
 import { concat, map, pluck, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { Units } from '../types/enums';
-
+// import { Units } from '../types/enums';
+import  { getDateTimestamp } from '../utils/date'
 type Handler = (message: any, sender: any, sendResponse: (response: any) => void) => void;
 
 const message$ = fromEventPattern(
@@ -12,34 +12,32 @@ const message$ = fromEventPattern(
    (handler: Handler) => chrome.runtime.onMessage.removeListener(handler),
    (message, sender, sendResponse) => ({ message, sender, sendResponse })
 ).pipe(
-    pluck('message', 'path')
+    pluck('message')
 )
-const path$ = Observable.create(function(observer) {
-    chrome.storage.local.get('path', observer.next.bind(observer))
-}).pipe(
-    pluck('path'),
-    map(path => path || 0),
-)
-// const unit$ = Observable.create(function(observer) {
-//     chrome.storage.local.get('unit', observer.next.bind(observer))
-// }).pipe(
-//     pluck('unit'),
-//     map(unit => unit || Units.CENTIMETER),
-// )
-// const unit$ = () => from(promiseGetValue('unit'))
-const merged$ = message$.pipe(
-   switchMap(sendedPath => path$(
-        path$,
-    ).pipe(
-        map(([path, unit]) => [sendedPath, path, unit]))
-    )
+// const setStorage$ = (value: any) => bindCallback<any, any>(chrome.storage.local.set)(value)
+const getStorage$ = (value: string) => bindCallback<string, any>(chrome.storage.local.get)(value).pipe(
+    pluck(value)
 )
 
 
-merged$.subscribe((a: number[]) => {
-    const [sendedPath, localPath] = a;
+
+const localAndSended$ = message$.pipe(
+    switchMap((sendedPath: number) => 
+        getStorage$(`${getDateTimestamp()}`).pipe(
+            map((savedPath: number = 0) => sendedPath + savedPath)
+        )
+    ),
+)
+localAndSended$.subscribe(path => {
     chrome.storage.local.set({
-        path: sendedPath + localPath
+        [getDateTimestamp()]: path
     })
 })
+
+// merged$.subscribe((a: number[]) => {
+//     const [sendedPath, localPath] = a;
+//     chrome.storage.local.set({
+//         path: sendedPath + localPath
+//     })
+// })
 // merged$.subscribe(console.log)

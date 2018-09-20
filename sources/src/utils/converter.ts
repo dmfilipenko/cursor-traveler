@@ -1,10 +1,11 @@
 import { curry, cond, equals } from 'ramda';
-import { Units } from './enums'
+import { Units } from '../types/enums'
 
 interface Store {
   path: number;
   unit: Units;
 }
+
 const cmToM = (cm: number) => 0.01 * cm
 const mToKm = (m: number) => 0.001 * m
 
