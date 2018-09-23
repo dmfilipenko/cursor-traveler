@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "Chrome Extension TypeScript Starter",
-  "description": "Chrome Extension, TypeScript, Visual Studio Code",
-  "version": "1.1",
+  "name": "Pedometer: mouse move counter",
+  "description": "Count how many moves make your mouse",
+  "version": "1.2",
 
   "options_ui": {
     "page": "options.html",

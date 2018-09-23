@@ -12,12 +12,7 @@ getStorage$(`${getDateTimestamp()}`).subscribe(dist => {
     $totalDistance.innerHTML = `${dist}`;
 })
 
-// storageChange$.pipe(
-//     tap(console.log)
-// )
-// .subscribe( dist =>
-//      = JSON.stringify(dist) 
-// )
+
 const setValue = v => $totalDistance.innerHTML = v
 storageChange$.subscribe(
     () => {
