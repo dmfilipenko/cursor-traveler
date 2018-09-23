@@ -1,25 +1,12 @@
 import { flatten, map as mapIterate, pipe as pipeR, values } from 'ramda';
 /* tslint:disable */
-import { combineLatest, fromEventPattern, Observable, bindCallback } from 'rxjs';
+import { bindCallback, combineLatest, fromEventPattern, Observable } from 'rxjs';
 import { concat, map, pluck, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 // import { Units } from '../types/enums';
-import  { getDateTimestamp } from '../utils/date'
-type Handler = (message: any, sender: any, sendResponse: (response: any) => void) => void;
-
-const message$ = fromEventPattern(
-   (handler: Handler) => chrome.runtime.onMessage.addListener(handler),
-   (handler: Handler) => chrome.runtime.onMessage.removeListener(handler),
-   (message, sender, sendResponse) => ({ message, sender, sendResponse })
-).pipe(
-    pluck('message')
-)
-// const setStorage$ = (value: any) => bindCallback<any, any>(chrome.storage.local.set)(value)
-const getStorage$ = (value: string) => bindCallback<string, any>(chrome.storage.local.get)(value).pipe(
-    pluck(value)
-)
-
-
+import { getDateTimestamp } from '../utils/date';
+import { message$ } from '../utils/eventMessage';
+import { getStorage$ } from '../utils/getFromStorage';
 
 const localAndSended$ = message$.pipe(
     switchMap((sendedPath: number) => 
@@ -28,16 +15,10 @@ const localAndSended$ = message$.pipe(
         )
     ),
 )
+
 localAndSended$.subscribe(path => {
     chrome.storage.local.set({
         [getDateTimestamp()]: path
     })
 })
 
-// merged$.subscribe((a: number[]) => {
-//     const [sendedPath, localPath] = a;
-//     chrome.storage.local.set({
-//         path: sendedPath + localPath
-//     })
-// })
-// merged$.subscribe(console.log)
