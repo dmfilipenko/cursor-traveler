@@ -1,4 +1,4 @@
-import { bindCallback, fromEvent, fromEventPattern } from 'rxjs';
+import { bindCallback, fromEventPattern } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 
 // import { StorageChange } from '@types';

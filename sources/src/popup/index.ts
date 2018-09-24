@@ -1,18 +1,17 @@
 import { pipe } from 'ramda';
 
-import { converter } from '../utils/converter';
+import { convertMetrics } from '../utils/converter';
 import { storageChange$ } from '../utils/getFromStorage';
 import { calculateTotal } from '../utils/total';
 
 const $totalDistance = document.querySelector('#total-distance')
-const setValue = v => $totalDistance.innerHTML = v
+const totalInHtml = v => $totalDistance.innerHTML = v
 
-const writeTotalValue = pipe(
+const writeTotal = () => chrome.storage.local.get(pipe(
     calculateTotal,
-    converter,
-    setValue
-)
+    convertMetrics,
+    totalInHtml
+))
 
-
-chrome.storage.local.get(writeTotalValue)
-storageChange$.subscribe(() => chrome.storage.local.get(writeTotalValue))
+writeTotal()
+storageChange$.subscribe(writeTotal)

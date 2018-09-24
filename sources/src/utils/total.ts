@@ -1,4 +1,6 @@
-import { pipe, sum, values } from 'ramda';
+import pipe from 'ramda/es/pipe';
+import sum from 'ramda/es/sum';
+import values from 'ramda/es/values';
 
 export const calculateTotal = pipe(
     values,
