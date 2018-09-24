@@ -1,26 +1,18 @@
-import { pipe, sum, values } from 'ramda';
+import { pipe } from 'ramda';
 
-// import { map, switchMap, tap } from 'rxjs/operators';
-// import { getDateTimestamp } from '../utils/date';
-// import { message$ } from '../utils/eventMessage';
+import { converter } from '../utils/converter';
 import { storageChange$ } from '../utils/getFromStorage';
-import { converter } from '../utils/converter'
-// const backgroundPage = chrome.extension.getBackgroundPage();
+import { calculateTotal } from '../utils/total';
+
 const $totalDistance = document.querySelector('#total-distance')
+const setValue = v => $totalDistance.innerHTML = v
 
-
-const setValue = (v) => $totalDistance.innerHTML = v
-const totalValue = pipe(
-    values,
-    sum,
-    (d) => {
-        debugger
-        return d
-    },
+const writeTotalValue = pipe(
+    calculateTotal,
     converter,
     setValue
 )
 
 
-chrome.storage.local.get(totalValue)
-storageChange$.subscribe(() => chrome.storage.local.get(totalValue))
+chrome.storage.local.get(writeTotalValue)
+storageChange$.subscribe(() => chrome.storage.local.get(writeTotalValue))

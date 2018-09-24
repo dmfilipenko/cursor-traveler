@@ -1,9 +1,11 @@
+import { pipe } from 'ramda';
 import { map, switchMap } from 'rxjs/operators';
 
-// import { Units } from '../types/enums';
+import { setBadge } from '../utils/badge';
 import { getDateTimestamp } from '../utils/date';
 import { message$ } from '../utils/eventMessage';
 import { getStorage$ } from '../utils/getFromStorage';
+import { calculateTotal, totalToBadge } from '../utils/total';
 
 const localAndSended$ = message$.pipe(
     switchMap((sendedPath: number) => 
@@ -18,4 +20,11 @@ localAndSended$.subscribe(path => {
         [getDateTimestamp()]: path
     })
 })
+
+const setTotalValueBadge = pipe(
+    calculateTotal,
+    totalToBadge,
+    setBadge
+)
+chrome.storage.local.get(setTotalValueBadge)
 

@@ -3,7 +3,7 @@
 
   "name": "Pedometer: mouse move counter",
   "description": "Count how many moves make your mouse",
-  "version": "1.5",
+  "version": "1.6",
   "options_ui": {
     "page": "options.html",
     "chrome_style": true

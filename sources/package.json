@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "watch": "webpack --config webpack/webpack.dev.js --watch",
-    "build": "webpack --config webpack/webpack.prod.js && zip -r -X pedometer.zip dist"
+    "build": "webpack --config webpack/webpack.prod.js",
+    "zip": "zip -r -X pedometer.zip dist",
+    "build:zip": "npm run build && npm run zip"
   },
   "author": "",
   "license": "MIT",
