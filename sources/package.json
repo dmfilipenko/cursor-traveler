@@ -21,6 +21,8 @@
     "@types/chrome": "~0.0.72",
     "@types/ramda": "^0.25.38",
     "@types/rx": "^4.1.1",
+    "clean-webpack-plugin": "^0.1.19",
+    "copy-webpack-plugin": "^4.5.2",
     "ts-loader": "~5.0.0",
     "typescript": "~3.0.3",
     "webpack": "~4.17.2",

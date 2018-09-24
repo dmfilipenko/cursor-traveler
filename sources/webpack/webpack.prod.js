@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const merge = require('webpack-merge');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const common = require('./webpack.common.js');
-const ZipFilesPlugin = require('webpack-zip-files-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const path = require('path')
 
 module.exports = merge(common, {
@@ -11,5 +11,10 @@ module.exports = merge(common, {
         minimizer: [
             new UglifyJSPlugin()
         ]
-    }
+    },
+    plugins: [
+        new CleanWebpackPlugin(path.join(__dirname, '../dist'), {
+            allowExternal: true
+        })
+    ]
 });
