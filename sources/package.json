@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "watch": "webpack --config webpack/webpack.dev.js --watch",
-    "build": "webpack --config webpack/webpack.prod.js"
+    "build": "webpack --config webpack/webpack.prod.js && zip -r -X pedometer.zip dist"
   },
   "author": "",
   "license": "MIT",
@@ -24,7 +24,9 @@
     "ts-loader": "~5.0.0",
     "typescript": "~3.0.3",
     "webpack": "~4.17.2",
+    "webpack-archive-plugin": "^3.0.0",
     "webpack-cli": "~3.1.0",
-    "webpack-merge": "~4.1.4"
+    "webpack-merge": "~4.1.4",
+    "webpack-zip-files-plugin": "^1.0.0"
   }
 }

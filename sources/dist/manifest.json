@@ -3,20 +3,20 @@
 
   "name": "Pedometer: mouse move counter",
   "description": "Count how many moves make your mouse",
-  "version": "1.4",
+  "version": "1.5",
   "options_ui": {
     "page": "options.html",
     "chrome_style": true
   },
 
   "icons": {
-    "16": "icons/icon-16.png",
-    "48": "icons/icon-48.png",
-    "128": "icons/icon-128.png"
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
   },
 
   "browser_action": {
-    "default_icon": "icons/icon-128.png",
+    "default_icon": "icons/128.png",
     "default_popup": "popup.html"
   },
 
