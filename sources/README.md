@@ -1,5 +1,8 @@
 # Mouse traveler
-- [ ] Change icon
-- [x] list syntax required (any unordered or ordered list supported)
-- [x] this is a complete item
-- [ ] this is an incomplete item
+- [ ] Change icon when lost focus
+- [ ] Draw icon for record and pause
+- [ ] Migrate old date to new ope
+- [ ] Create popup for achievements
+- [ ] Write tests
+- [ ] Add CI/CD
+  
