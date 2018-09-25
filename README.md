@@ -18,7 +18,7 @@ https://github.com/processprocess/mouse-speed
 - [ ] Change icon when lost focus
 - [ ] Draw icon for record and pause
 - [ ] Migrate old date to new ope
-- [ ] Create popup for achievements
+- [ ] [Create popup for achievements](https://github.com/dmfilipenko/Pedometr/pull/1/files)
 - [ ] Write tests
 - [ ] Add CI/CD
 - [ ] When open popup, update data in realtime
