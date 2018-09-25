@@ -1,6 +1,4 @@
-# Chrome Extension TypeScript Starter
-
-[![Build Status](https://travis-ci.org/chibat/chrome-extension-typescript-starter.svg?branch=master)](https://travis-ci.org/chibat/chrome-extension-typescript-starter)
+# Mouse traveler
 
 Chrome Extension, TypeScript and Visual Studio Code
 
@@ -28,7 +26,7 @@ Chrome Extension, TypeScript and Visual Studio Code
 ## Project Structure
 
 * src: TypeScript source files
-* dist: Chrome Extension directory
+* extension: Chrome Extension directory
 * dist/js: Generated JavaScript files
 
 ## Setup
