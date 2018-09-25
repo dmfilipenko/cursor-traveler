@@ -1,4 +1,4 @@
-import { pipe } from 'ramda';
+import pipe from 'ramda/es/pipe';
 
 import { convertMetrics } from '../utils/converter';
 import { storageChange$ } from '../utils/getFromStorage';
