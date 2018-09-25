@@ -29,7 +29,7 @@
   "background": {
     "scripts": ["js/background.js"]
   },
-
+  "offline_enabled": true,
   "permissions": [
     "storage",
     "<all_urls>"
