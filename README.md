@@ -21,3 +21,5 @@ https://github.com/processprocess/mouse-speed
 - [ ] Create popup for achievements
 - [ ] Write tests
 - [ ] Add CI/CD
+- [ ] When open popup, update data in realtime
+- [ ] Add dynamic tooltip
