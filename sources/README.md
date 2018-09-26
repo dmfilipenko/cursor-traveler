@@ -1,8 +1,7 @@
 # Mouse traveler
-- [ ] Change icon when lost focus
-- [ ] Draw icon for record and pause
-- [ ] Migrate old date to new ope
-- [ ] Create popup for achievements
-- [ ] Write tests
-- [ ] Add CI/CD
+`npm run watch` watch for changes(for development)
+    
+`npm run build` build dist folder with transpiled files    
+
+`build:zip` build and zip to upload in chrome web store
   
