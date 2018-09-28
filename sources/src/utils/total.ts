@@ -8,6 +8,6 @@ export const calculateTotal = pipe(
 )
 
 export const totalToBadge = total => {
-    const [f,s = '',t = '', ff = ''] = `${total}`
-    return `${f}${s}${t}${ff}`
+    // const [f,s = '',t = '', ff = ''] = `${total}`
+    return ``
 }
