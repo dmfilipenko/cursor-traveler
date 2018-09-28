@@ -3,5 +3,7 @@
     
 `npm run build` build dist folder with transpiled files    
 
-`build:zip` build and zip to upload in chrome web store
+`npm run build:zip` build and zip to upload in chrome web store
+
+`npm run test:unit` to run unit tests
   
