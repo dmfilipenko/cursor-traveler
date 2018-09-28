@@ -1,8 +1,8 @@
-import always from 'ramda/es/always';
-import cond from 'ramda/es/cond';
-import lte from 'ramda/es/lte';
-import pipe from 'ramda/es/pipe';
-import T from 'ramda/es/T';
+import * as always from 'ramda/src/always';
+import * as cond from 'ramda/src/cond';
+import * as lte from 'ramda/src/lte';
+import * as pipe from 'ramda/src/pipe';
+import * as  T from 'ramda/src/T';
 
 import { Units } from '../types/enums';
 
