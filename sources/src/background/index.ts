@@ -20,9 +20,6 @@ localAndSended$.subscribe(path => {
 })
 
 
-chrome.browserAction.onClicked.addListener(({id}) => {
-    chrome.tabs.sendMessage(id, 'popup_clicked')
-})
 storageChange$.subscribe(setTotalToBadge)
 setTotalToBadge()
 

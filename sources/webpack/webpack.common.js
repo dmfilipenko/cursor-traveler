@@ -4,15 +4,17 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        popup: [
-            path.join(__dirname, '../src/popup/index.ts'),
+        // popup: [
+        //     path.join(__dirname, '../src/popup/index.ts'),
             
-        ],
+        // ],
         // options: path.join(__dirname, '../src/options/index.ts'),
-        background: path.join(__dirname, '../src/background/index.ts'),
+        background: [
+            path.join(__dirname, '../src/background/index.ts'),
+            path.join(__dirname, '../src/background/popupInteraction.ts'),
+        ],
         content_script: [
-            path.join(__dirname, '../src/content/index.ts'),
-            path.join(__dirname, '../src/content/popup.ts')
+            path.join(__dirname, '../src/content/index.ts')
         ]
     },
     output: {
