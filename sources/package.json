@@ -7,10 +7,10 @@
     "watch": "webpack --config webpack/webpack.dev.js --watch",
     "build": "webpack --config webpack/webpack.prod.js",
     "zip": "zip -r -X pedometer.zip dist",
-    "build:zip": "npm run build && npm run zip"
+    "build:zip": "npm run build && npm run zip",
+    "test:unit": "jest -c jest.config.unit.js"
   },
   "author": "",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
@@ -20,13 +20,17 @@
     "rxjs": "^6.3.2"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.1.0",
     "@types/chrome": "~0.0.72",
+    "@types/jest": "^23.3.2",
     "@types/ramda": "^0.25.38",
     "@types/rx": "^4.1.1",
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.2",
+    "jest": "^23.6.0",
+    "ts-jest": "23.1.4",
     "ts-loader": "~5.0.0",
-    "typescript": "~3.0.3",
+    "typescript": "^3.1.1",
     "webpack": "~4.17.2",
     "webpack-archive-plugin": "^3.0.0",
     "webpack-cli": "~3.1.0",

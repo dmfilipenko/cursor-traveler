@@ -1,6 +1,6 @@
-import pipe from 'ramda/es/pipe';
-import sum from 'ramda/es/sum';
-import values from 'ramda/es/values';
+import * as pipe from 'ramda/src/pipe';
+import * as sum from 'ramda/src/sum';
+import * as values from 'ramda/src/values';
 
 export const calculateTotal = pipe(
     values,
@@ -8,6 +8,6 @@ export const calculateTotal = pipe(
 )
 
 export const totalToBadge = total => {
-    const [f,s = '',t = '', ff = ''] = `${total}`
-    return `${f}${s}${t}${ff}`
+    // const [f,s = '',t = '', ff = ''] = `${total}`
+    return ``
 }
