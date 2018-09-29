@@ -1,11 +1,15 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es2017",
+        "outDir": "./dist/",
         "noImplicitAny": false,
         "sourceMap": false,
-        "rootDir": "src",
-        "outDir": "dist/js",
-        "noEmitOnError": true
+        "module": "commonjs",
+        "lib": [
+        "es6",
+        "dom"
+        ],
+        "target": "es5",
+        "allowJs": true,
+        "moduleResolution": "node"
     }
 }
