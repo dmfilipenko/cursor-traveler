@@ -32,8 +32,5 @@ const $distDistinct = distance$.pipe(
     filter(v => v > 0),
 )
 
-const div = document.createElement('div')
-div.classList.add('cursor-traveler-container')
-document.body.appendChild(div);
 
 $distDistinct.subscribe(chrome.runtime.sendMessage)
