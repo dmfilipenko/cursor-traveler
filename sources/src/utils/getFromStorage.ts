@@ -11,5 +11,4 @@ type Handler = (changes: {[key: string]: StorageChange}, areaName: string) => vo
 export const storageChange$ = fromEventPattern(
     (handler: Handler) => chrome.storage.onChanged.addListener(handler),
     (handler: Handler) => chrome.storage.onChanged.removeListener(handler),
-    (message) => message
 )
