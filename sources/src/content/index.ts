@@ -1,5 +1,3 @@
-import './popup/index';
-
 import { fromEvent } from 'rxjs';
 import { bufferTime, filter, map, pairwise, startWith } from 'rxjs/operators';
 
@@ -34,6 +32,8 @@ const $distDistinct = distance$.pipe(
     filter(v => v > 0),
 )
 
-
+const div = document.createElement('div')
+div.classList.add('cursor-traveler-container')
+document.body.appendChild(div);
 
 $distDistinct.subscribe(chrome.runtime.sendMessage)

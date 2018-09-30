@@ -14,7 +14,8 @@ module.exports = {
             path.join(__dirname, '../src/background/popupInteraction.ts'),
         ],
         content_script: [
-            path.join(__dirname, '../src/content/index.ts')
+            path.join(__dirname, '../src/content/index.ts'),
+            path.join(__dirname, '../src/content/popup/index.ts')
         ]
     },
     output: {
