@@ -3,10 +3,26 @@ import { Component, h, render } from 'preact';
 const div = document.createElement('div')
 div.classList.add('cursor-traveler-container')
 document.body.appendChild(div);
-class Clock extends Component {
+
+class Title extends Component {
     render() {
-        let time = new Date().toLocaleTimeString();
-        return <span>{ time }</span>;
+        return (
+            <title>
+                <span>You traveled</span>
+                <div>test</div>
+            </title>
+        );
     }
 }
-render(<Clock />, div);
+
+class Data extends Component {
+    render() {
+        return <span>HELLO</span>;
+    }
+}
+
+render((
+    <div>
+        <Title />
+        <Data />
+    </div>), div);
