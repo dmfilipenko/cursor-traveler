@@ -1,28 +1,41 @@
 import { Component, h, render } from 'preact';
+import styled from 'styled-components';
+// import styledComponentsTS from 'styled-components-ts'
 
 const div = document.createElement('div')
+
 div.classList.add('cursor-traveler-container')
 document.body.appendChild(div);
 
-class Title extends Component {
+
+class TitleComponent extends Component {
+    render() {
+        return (<span>You traveled 🏁</span>)
+    }
+}
+
+const StyledTitle = styled.div`
+          font-size: 1.5em;
+          text-align: center;
+          color: palevioletred;
+        `;
+
+class DataComponent extends Component {
     render() {
         return (
-            <title>
-                <span>You traveled</span>
-                <div>test</div>
-            </title>
+            <div className="data">
+                <div class="number">155<span>.123</span>
+                </div>
+                <div class="text">kilometres</div>
+            </div>
         );
     }
 }
 
-class Data extends Component {
-    render() {
-        return <span>HELLO</span>;
-    }
-}
-
 render((
-    <div>
-        <Title />
-        <Data />
+    <div className="cursor-traveler-container">
+        <StyledTitle>
+            <TitleComponent />
+        </StyledTitle>
+        <DataComponent />
     </div>), div);
