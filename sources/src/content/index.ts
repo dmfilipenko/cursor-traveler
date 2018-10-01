@@ -30,7 +30,7 @@ const distance$ = fromEvent(document, 'mousemove')
 
 const $distDistinct = distance$.pipe(
     bufferTime(5000),
-    map(v => v.reduce((a, c) => a + c, 0)),
+    map(v => v.reduce((a:number, c:number) => a + c, 0)),
     filter(v => v > 0),
 )
 
