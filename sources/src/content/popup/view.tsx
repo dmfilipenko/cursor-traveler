@@ -8,22 +8,22 @@ div.classList.add('cursor-traveler-container')
 document.body.appendChild(div);
 
 const TitleComponent = () => (
-    <span className={style.local}>You traveled 🏁</span>
+    <span className={style.title}>You traveled 🏁</span>
 )
 
 
 const DataComponent = (props) => (
-    <div className="data">
-        <div class="number">
+    <div className={style.data}>
+        <div className={style.number}>
             155<span>.123</span>
         </div>
-        <div class="text">kilometres</div>
+        <div className={style.unit}>kilometres</div>
     </div>
 )
 
 render(
-    <div>
-        <TitleComponent />
-        <DataComponent />
-    </div>
+    <div className={style.wrapper}>
+             <TitleComponent />
+             <DataComponent />
+         </div>
 , div);
