@@ -1,31 +1,16 @@
 import { h, render } from 'preact';
 import { compose, lifecycle } from 'recompose';
-import styled from 'styled-components';
+import * as style from './test.css';
 
 const div = document.createElement('div')
 
 div.classList.add('cursor-traveler-container')
 document.body.appendChild(div);
 
-
-
-const StyledTitle = styled.div`
-    font-size: 1.5em;
-    text-align: center;
-    color: palevioletred;
-`;
-
-const TitleComponent = (props) => (
-    <span className={props.className}>You traveled 🏁</span>
+const TitleComponent = () => (
+    <span className={style.local}>You traveled 🏁</span>
 )
 
-const Title = compose(
-    lifecycle({
-        componentDidMount() {
-            console.log('component mount')
-        }
-    })
-)(TitleComponent)
 
 const DataComponent = (props) => (
     <div className="data">
@@ -37,8 +22,8 @@ const DataComponent = (props) => (
 )
 
 render(
-    <StyledTitle>
-        <Title />
+    <div>
+        <TitleComponent />
         <DataComponent />
-    </StyledTitle>
+    </div>
 , div);
