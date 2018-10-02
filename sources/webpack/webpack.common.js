@@ -64,9 +64,6 @@ module.exports = {
         }
     },
     plugins: [
-        new webpack.WatchIgnorePlugin([
-            /css\.d\.ts$/
-        ]),
         new CopyWebpackPlugin([ {
             from: path.join(__dirname, '../extension/**/**'),
             to: path.join(__dirname, '../dist'),
