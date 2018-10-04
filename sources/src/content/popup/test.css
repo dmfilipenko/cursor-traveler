@@ -1,8 +1,24 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
 .wrapper {
+  position: fixed;
+  right: 2em;
+  top:0;
+  z-index: 100;
+  margin: 0 auto;
+  height: auto;
+  width: 229px;
+  font-family: 'Montserrat', sans-serif;
+  border: 1px solid rgba(158, 158, 158, 0.3);
+  border-radius: 5px;
+  padding: 10px;
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
+  background: #fff;
+  /*idk, do we need prefix webkit here*/
+  -webkit-box-shadow: 0 4px 2px -2px rgba(158,158,158,0.3);
+  box-shadow: 0 4px 2px -2px rgba(158,158,158,0.3);
 }
 .title {
   color: #7A7A7A;
@@ -14,6 +30,8 @@
   align-items: center;
   justify-content: center;
   color: #000;
+  line-height: 1.5em;
+  margin-top: 1.5em;
 }
 .number {
   font-size: 3.3em;
@@ -26,3 +44,32 @@
 .unit {
   text-align: center;
 }
+.close {
+  position: absolute;
+  right: 5px;
+  top: 9px;
+  width: 12px;
+  height: 12px;
+  opacity: 0.3;
+  border: none;
+  outline: none;
+}
+.close:hover {
+  opacity: 1;
+}
+.close:before, .close:after {
+  position: absolute;
+  top: 0px;
+  left: 5px;
+  content: ' ';
+  height: 12px;
+  width: 2px;
+  background-color: #333;
+}
+.close:before {
+  transform: rotate(45deg);
+}
+.close:after {
+  transform: rotate(-45deg);
+}
+
