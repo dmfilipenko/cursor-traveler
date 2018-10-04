@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Montserrat');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
 .wrapper {
   position: fixed;
   right: 2em;
@@ -6,19 +6,19 @@
   z-index: 100;
   margin: 0 auto;
   height: auto;
-  width: 229px;
-  font-family: 'Montserrat', sans-serif;
-  border: 1px solid rgba(158, 158, 158, 0.3);
-  border-radius: 5px;
-  padding: 10px;
+  width: 200px;
+  font-family: 'Open Sans', sans-serif;
+  border: 1px solid rgba(199, 199, 199, 0.3);
+  border-radius: 7px;
+  padding: 15px;
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
   background: #fff;
-  /*idk, do we need prefix webkit here*/
-  -webkit-box-shadow: 0 4px 2px -2px rgba(158,158,158,0.3);
-  box-shadow: 0 4px 2px -2px rgba(158,158,158,0.3);
+  box-shadow: 0 6px 10px 0 rgba(154, 153, 153, 0.14),
+  0 1px 18px 0 rgba(154, 153, 153, 0.14),
+  0 3px 5px -1px rgba(251, 249, 249, 0.4);
 }
 .title {
   color: #7A7A7A;
@@ -31,7 +31,7 @@
   justify-content: center;
   color: #000;
   line-height: 1.5em;
-  margin-top: 1.5em;
+  margin-top: 2em;
 }
 .number {
   font-size: 3.3em;
