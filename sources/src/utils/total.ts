@@ -6,8 +6,3 @@ export const calculateTotal = pipe(
     values,
     sum,
 )
-
-export const totalToBadge = total => {
-    // const [f,s = '',t = '', ff = ''] = `${total}`
-    return ``
-}

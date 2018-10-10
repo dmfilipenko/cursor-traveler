@@ -6,7 +6,5 @@ type Handler = (message: any, sender: any, sendResponse: (response: any) => void
 export const message$ = fromEventPattern(
    (handler: Handler) => chrome.runtime.onMessage.addListener(handler),
    (handler: Handler) => chrome.runtime.onMessage.removeListener(handler),
-   (message, sender, sendResponse) => ({ message, sender, sendResponse })
-).pipe(
-    pluck('message')
+   (message) => message
 )
