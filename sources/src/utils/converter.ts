@@ -2,14 +2,14 @@ import * as always from 'ramda/src/always';
 import * as cond from 'ramda/src/cond';
 import * as lte from 'ramda/src/lte';
 import * as pipe from 'ramda/src/pipe';
-import * as  T from 'ramda/src/T';
+import * as T from 'ramda/src/T';
 
 import { Units } from '../types/enums';
 
 const cmToM = (cm: number) => 0.01 * cm
 const mToKm = (m: number) => 0.001 * m
 
-const addMetric = (metric) => (v) => `${v} ${metric}`
+const addMetric = (metric) => (v) => [v, metric]
 const fixed = n => v => v.toFixed(n)
 export const convertMetrics = cond([
   [lte(10 ** 5), pipe(cmToM, mToKm, fixed(3), addMetric(Units.KILOMETR))],

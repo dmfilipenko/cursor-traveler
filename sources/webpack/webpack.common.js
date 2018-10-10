@@ -1,20 +1,19 @@
 const webpack = require("webpack");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 const path = require('path');
 
 module.exports = {
     entry: {
-        // popup: [
-        //     path.join(__dirname, '../src/popup/index.ts'),
-            
-        // ],
-        // options: path.join(__dirname, '../src/options/index.ts'),
         background: [
-            path.join(__dirname, '../src/background/index.ts'),
-            path.join(__dirname, '../src/background/popupInteraction.ts'),
+            path.join(__dirname, '../src/background'),
+            // path.join(__dirname, '../src/background/popupInteraction.ts'),
         ],
         content_script: [
-            path.join(__dirname, '../src/content/index.ts')
+            path.join(__dirname, '../src/content')
+        ],
+        popup: [
+            path.join(__dirname, '../src/popup')
         ]
     },
     output: {
@@ -54,14 +53,6 @@ module.exports = {
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js'],
-        alias: {
-            'react': 'preact-compat',
-            'react-dom': 'preact-compat',
-            // Not necessary unless you consume a module using `createClass`
-            'create-react-class': 'preact-compat/lib/create-react-class',
-            // Not necessary unless you consume a module requiring `react-dom-factories`
-            'react-dom-factories': 'preact-compat/lib/react-dom-factories'
-        }
     },
     plugins: [
         new CopyWebpackPlugin([ {

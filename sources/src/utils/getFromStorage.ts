@@ -16,8 +16,3 @@ export const storageChange$ = fromEventPattern(
     (handler: Handler) => chrome.storage.onChanged.removeListener(handler),
     (message, sender, sendResponse) => ({ message, sender, sendResponse })
 )
-.pipe(
-    pluck('message'),
-    pluck(`${getDateTimestamp()}`),
-    pluck('newValue')
-)

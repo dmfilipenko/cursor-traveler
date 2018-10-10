@@ -1,7 +1,6 @@
-import './popup/index';
-
 import { fromEvent } from 'rxjs';
 import { bufferTime, filter, map, pairwise, startWith } from 'rxjs/operators';
+
 
 const distance$ = fromEvent(document, 'mousemove')
     .pipe(
