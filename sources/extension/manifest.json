@@ -26,11 +26,6 @@
     "js": ["js/content_script.js"],
     "run_at": "document_end",
     "all_frames": true
-  },
-  {
-    "matches": ["<all_urls>"],
-    "js": ["js/popup.js"],
-    "run_at": "document_end"
   }],
 
   "background": {

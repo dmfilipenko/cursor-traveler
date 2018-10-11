@@ -1,8 +1,8 @@
+import * as flip from 'ramda/src/flip';
 import * as gt from 'ramda/src/gt';
-import * as reduce from 'ramda/src/reduce';
 import * as sum from 'ramda/src/sum';
 import { fromEvent } from 'rxjs';
-import { bufferTime, filter, map, pairwise, startWith } from 'rxjs/operators';
+import { bufferTime, filter, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { pxToCm } from '../utils/converter';
 
@@ -27,14 +27,13 @@ const distance$ = fromEvent(document, 'mousemove')
                 Math.pow((currX - prevX), 2) + Math.pow((currY - prevY), 2)
             )
         )),
-        map(pxToCm),
-        filter(gt(0))
+        map(pxToCm)
     )
 
 const $distDistinct = distance$.pipe(
     bufferTime(5000),
-    map(reduce(sum, 0)),
-    filter(gt(0)),
+    map(sum),
+    tap(v => v > 0)
 )
 
 
