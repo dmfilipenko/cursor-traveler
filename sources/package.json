@@ -35,7 +35,6 @@
     "copy-webpack-plugin": "^4.5.2",
     "css-loader": "^1.0.0",
     "jest": "^23.6.0",
-    "preact-compat": "^3.18.4",
     "style-loader": "^0.23.0",
     "ts-jest": "23.1.4",
     "ts-loader": "~5.0.0",

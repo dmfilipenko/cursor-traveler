@@ -1,5 +1,4 @@
 import { fromEventPattern } from 'rxjs';
-import { pluck } from 'rxjs/operators';
 
 type Handler = (message: any, sender: any, sendResponse: (response: any) => void) => void;
 

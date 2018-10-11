@@ -1,5 +1,3 @@
-import * as flip from 'ramda/src/flip';
-import * as gt from 'ramda/src/gt';
 import * as sum from 'ramda/src/sum';
 import { fromEvent } from 'rxjs';
 import { bufferTime, filter, map, pairwise, startWith, tap } from 'rxjs/operators';
