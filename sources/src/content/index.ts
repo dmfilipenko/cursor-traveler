@@ -1,6 +1,6 @@
 import * as sum from 'ramda/src/sum';
 import { fromEvent } from 'rxjs';
-import { bufferTime, filter, map, pairwise, startWith, tap } from 'rxjs/operators';
+import { bufferTime, filter, map, pairwise, startWith } from 'rxjs/operators';
 
 import { pxToCm } from '../utils/converter';
 
@@ -31,8 +31,7 @@ const distance$ = fromEvent(document, 'mousemove')
 const $distDistinct = distance$.pipe(
     bufferTime(5000),
     map(sum),
-    tap(v => v > 0)
+    filter(v => v > 0)
 )
-
-
 $distDistinct.subscribe(chrome.runtime.sendMessage)
+

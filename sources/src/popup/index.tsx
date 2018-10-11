@@ -17,6 +17,7 @@ const View = (props) => (
         {props.metric && <div className={s.unit}>{props.metric}</div>}
     </div>
 )
+
 const renderPopup = () => chrome.storage.local.get(
     pipe(
         calculateTotal,
@@ -28,4 +29,7 @@ const renderPopup = () => chrome.storage.local.get(
 renderPopup()
 storageChange$.subscribe(renderPopup)
 
+// window.onblur = function(){
+//     chrome.browserAction.setBadgeText({"text":"ABCD"});
+// }
 

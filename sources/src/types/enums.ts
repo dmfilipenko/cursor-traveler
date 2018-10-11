@@ -1,7 +1,7 @@
 export enum UnitsFull {
   CENTIMETER = 'centimetre',
-  METER = 'metres',  
-  KILOMETR = 'kilometres',
+  METER = 'metre',  
+  KILOMETR = 'kilometre',
   INCH = 'in',
   FOOT = 'ft',
   YARD = 'yd',
