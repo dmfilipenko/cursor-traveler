@@ -1,13 +1,20 @@
 const webpack = require("webpack");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 const path = require('path');
 
 module.exports = {
     entry: {
-        popup: path.join(__dirname, '../src/popup/index.ts'),
-        options: path.join(__dirname, '../src/options/index.ts'),
-        background: path.join(__dirname, '../src/background/index.ts'),
-        content_script: path.join(__dirname, '../src/content/index.ts')
+        background: [
+            path.join(__dirname, '../src/background'),
+            // path.join(__dirname, '../src/background/popupInteraction.ts'),
+        ],
+        content_script: [
+            path.join(__dirname, '../src/content')
+        ],
+        popup: [
+            path.join(__dirname, '../src/popup')
+        ]
     },
     output: {
         path: path.join(__dirname, '../dist/js'),
@@ -25,11 +32,27 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
-            }
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    {
+                        loader: "css-loader",
+                        options: {
+                            modules: true,
+                            importLoaders: 1,
+                            localIdentName: "[name]_[local]_[hash:base64]",
+                            sourceMap: true,
+                            minimize: true
+                        }
+                    }
+                ]
+              }
         ]
     },
     resolve: {
-        extensions: ['.ts', '.tsx', '.js']
+        extensions: ['.ts', '.tsx', '.js'],
     },
     plugins: [
         new CopyWebpackPlugin([ {

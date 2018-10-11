@@ -3,7 +3,7 @@
 
   "name": "Cursor Traveler: mouse move counter",
   "description": "Count how many moves make your mouse",
-  "version": "1.8.4",
+  "version": "2.0.0",
   "options_ui": {
     "page": "options.html",
     "chrome_style": true
@@ -25,7 +25,6 @@
   "content_scripts": [{
     "matches": ["<all_urls>"],
     "js": ["js/content_script.js"],
-    "run_at": "document_end",
     "all_frames": true
   }],
 
