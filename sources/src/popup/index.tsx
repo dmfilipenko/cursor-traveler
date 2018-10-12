@@ -8,15 +8,18 @@ import { calculateTotal } from '../utils/total';
 import * as s from './styles.css';
 
 const div = document.querySelector('#root')
-const View = (props) => (
-    <div className={s.wrapper}>
-        <div className={s.title}>You traveled 🏁</div>
-        <div className={s.total}>
-            {props.total}
+const View = (props: {total: number, metric: string}) => {
+    const [decimal, mantissa] = props.total.toString().split('.')
+    return (
+        <div className={s.wrapper}>
+            <div className={s.title}>Mouse traveled</div>
+            <div className={s.total}>
+                {decimal}<span>.{mantissa}</span>
+            </div>
+            {props.metric && <div className={s.unit}>{props.metric}</div>}
         </div>
-        {props.metric && <div className={s.unit}>{props.metric}</div>}
-    </div>
-)
+    )
+}
 
 const renderPopup = () => chrome.storage.local.get(
     pipe(

@@ -1,4 +1,4 @@
-declare module '*.css'
+declare module '*.css';
 interface StorageChange {
     /** Optional. The new value of the item, if there is a new value. */
     newValue?: any;
