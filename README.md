@@ -1,4 +1,4 @@
-# Mouse traveler
+# Cursor traveler
 ![Logo Cursor](https://lh3.googleusercontent.com/6NRsSjT7fgBua1OT8cLIUKl3ISykY8AhSINasa5pbvwpomtekbI_UA6jA4lMf2Nn69F-Syu7=w640-h400-e365)
 
 
