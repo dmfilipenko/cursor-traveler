@@ -1,5 +1,5 @@
 {
-  "name": "Cursor Traveler",
+  "name": "cursor-traveler",
   "version": "1.0.0",
   "description": "Cursor Traveler: Chrome Extension. Count how many moves make your mouse",
   "scripts": {
@@ -12,18 +12,13 @@
   "author": "Dmytro Filipenko",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
+    "url": "https://github.com/dmfilipenko/cursor-traveler"
   },
   "dependencies": {
     "ramda": "^0.25.0",
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2",
-    "recompose": "^0.30.0",
     "rxjs": "6.3.1"
   },
   "devDependencies": {
-    "@types/react": "^16.4.16",
-    "@types/react-dom": "^16.0.9",
     "@babel/plugin-transform-modules-commonjs": "^7.1.0",
     "@types/chrome": "~0.0.72",
     "@types/jest": "^23.3.2",
@@ -38,11 +33,9 @@
     "ts-jest": "23.1.4",
     "ts-loader": "~5.0.0",
     "typescript": "^3.1.1",
-    "webpack": "~4.17.2",
-    "webpack-archive-plugin": "^3.0.0",
+    "webpack": "^4.17.3",
     "webpack-bundle-analyzer": "^3.0.2",
     "webpack-cli": "~3.1.0",
-    "webpack-merge": "~4.1.4",
-    "webpack-zip-files-plugin": "^1.0.0"
+    "webpack-merge": "^4.1.4"
   }
 }
