@@ -19,6 +19,5 @@ localAndSended$.subscribe(path => {
     })
 })
 
-
 storageChange$.subscribe(setTotalToBadge)
 setTotalToBadge()
