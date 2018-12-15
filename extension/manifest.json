@@ -16,7 +16,7 @@
     "128": "128.png"
   },
 
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
+  "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
   "browser_action": {
     "default_icon": "128.png",
     "default_popup": "popup.html"
@@ -29,7 +29,7 @@
   }],
 
   "background": {
-    "scripts": ["analytics.js","js/background.js"]
+    "scripts": ["js/analytics.js","js/background.js"]
   },
   "offline_enabled": true,
   "permissions": [
