@@ -6,3 +6,4 @@ interface StorageChange {
     oldValue?: any;
 }
 
+declare var _gaq: any;
