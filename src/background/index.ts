@@ -18,6 +18,19 @@ localAndSended$.subscribe(path => {
         [getDateTimestamp()]: path
     })
 })
+try {
+    
+    ga('send', 'pageview');
+}
+catch (e) {
+    console.log(e)
+}
 
+chrome.runtime.onInstalled.addListener(function listener(details) {
+    if (details.reason === (chrome.runtime as any).OnInstalledReason.INSTALL) {
+        ga('send', 'event', 'Install', true);
+        chrome.runtime.onInstalled.removeListener(listener);
+    }
+  });
 storageChange$.subscribe(setTotalToBadge)
 setTotalToBadge()

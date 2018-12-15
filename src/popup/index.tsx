@@ -24,6 +24,11 @@ const renderPopup = () => chrome.storage.local.get(
         ([ total = 0, metric ]) => render(total, metric)
     )
 )
-
+try {
+    ga('send', 'pageview');
+}
+catch (e) {
+    console.log(e)
+}
 renderPopup()
 storageChange$.subscribe(renderPopup)

@@ -14,7 +14,8 @@ module.exports = {
         ],
         popup: [
             path.join(__dirname, '../src/popup')
-        ]
+        ],
+        analytics: path.join(__dirname, '../src/analytics.js')
     },
     output: {
         path: path.join(__dirname, '../dist/js'),
