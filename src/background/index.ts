@@ -18,19 +18,19 @@ localAndSended$.subscribe(path => {
         [getDateTimestamp()]: path
     })
 })
+
+chrome.runtime.onInstalled.addListener(function listener(details) {
+    if (details.reason === (chrome.runtime as any).OnInstalledReason.INSTALL) {
+        ga('send', 'event', 'Install', 'Install extension');
+        chrome.runtime.onInstalled.removeListener(listener);
+    }
+});
+storageChange$.subscribe(setTotalToBadge)
+setTotalToBadge()
+
 try {
-    
-    ga('send', 'pageview');
+    ga('send', 'pageview', 'background');
 }
 catch (e) {
     console.log(e)
 }
-
-chrome.runtime.onInstalled.addListener(function listener(details) {
-    if (details.reason === (chrome.runtime as any).OnInstalledReason.INSTALL) {
-        ga('send', 'event', 'Install', true);
-        chrome.runtime.onInstalled.removeListener(listener);
-    }
-  });
-storageChange$.subscribe(setTotalToBadge)
-setTotalToBadge()
