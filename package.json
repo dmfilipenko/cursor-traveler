@@ -7,7 +7,8 @@
     "build": "webpack --config webpack/webpack.prod.js",
     "zip": "zip -r -X pedometer.zip dist",
     "build:zip": "npm run build && npm run zip",
-    "test:unit": "jest -c jest.config.unit.js"
+    "test": "jest -c jest.config.unit.js",
+    "test:watch": "npm run test -- --watch"
   },
   "author": "Dmytro Filipenko",
   "repository": {
