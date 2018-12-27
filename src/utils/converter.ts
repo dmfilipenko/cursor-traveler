@@ -36,7 +36,7 @@ const yardToMile = pipe(
 
 const addMetric = curry((metric, v) => [v, metric])
 const fixed = curry((n, v) => v.toFixed(n))
-const addPluralToMetric = ([v, metric]) => [v, addPluralForm(v, metric)]
+const addPluralToMetric = ([v, metric]) => [v, addPluralForm(metric, v)]
 const unitRounding = (round = always, tranform = always) => pipe(
   tranform,
   round,

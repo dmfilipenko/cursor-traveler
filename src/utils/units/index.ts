@@ -1,12 +1,29 @@
-import * as multiply from 'ramda/src/multiply';
-import * as curry from 'ramda/src/curry';
+import { multiply, curry, identity, unapply, curryN, invoker, pipe, juxt, flip } from 'ramda';
+import { addPluralForm } from '../plural';
+import {UnitsFull} from '../../types/enums';
+import {argsToList} from '../general';
+// import  from 'ramda/es/juxt';
 
 export const pxToCm = multiply(0.02645833)
+export const reverse = invoker(0, 'reverse')
+
+export const metricValueToList = curryN(2,
+  pipe(
+    argsToList,
+    reverse
+  )
+)
+export const toFixedCurr = curry((num: number, val: number) => val.toFixed(num))
+export const addPluralToMetric = curry(
+  juxt([
+    flip(identity), 
+    addPluralForm
+  ])
+)
 
 
-export const metricValueToList = curry((metric, v) => [v, metric])
-export const toFixedCurr = curry((num, val) => val.toFixed(num))
-// const addPluralToMetric = ([v, metric]) => [v, addPluralForm(v, metric)]
+
+
 // const unitRounding = (round = always, tranform = always) => pipe(
 //   tranform,
 //   round,

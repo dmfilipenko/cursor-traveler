@@ -2,10 +2,11 @@ export enum UnitsFull {
   CENTIMETER = 'centimeter',
   METER = 'meter',  
   KILOMETR = 'kilometer',
-  INCH = 'in',
-  FOOT = 'ft',
-  YARD = 'yd',
-  MILE = 'ml',
+  INCH = 'inch',
+  FOOT = 'foot',
+  FEET = 'feet',
+  YARD = 'yard',
+  MILE = 'mile',
 }
 
 export enum UnitsShort {
@@ -14,6 +15,7 @@ export enum UnitsShort {
   KILOMETR = 'km',
   INCH = 'in',
   FOOT = 'ft',
+  FEET = 'ft',
   YARD = 'yd',
   MILE = 'ml',
 }

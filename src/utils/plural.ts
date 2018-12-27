@@ -1,10 +1,23 @@
-import * as cond from 'ramda/src/cond';
-import * as lte from 'ramda/src/lte';
-import * as always from 'ramda/src/always';
-import * as T from 'ramda/src/T';
+import { cond, lte, always, curryN, T, pipe, last, head } from 'ramda'
+import * as equals from 'ramda/src/equals';
+import * as and from 'ramda/src/and';
+import { UnitsFull } from '../types/enums';
+import {argsToList} from './general';
+const lessOrEqualTwo = pipe(
+  argsToList,
+  n => last<number>(n),
+  lte(2)
+)
 
-
-export const addPluralForm = (v, metric) => cond([
-  [lte(2), always(`${metric}s`)],
-  [T, always(metric)]
-])(v)
+export const addPluralForm = curryN(2, cond([
+  [lessOrEqualTwo, pipe(
+    head,
+    v => always(`${v}s`)
+  )],
+  [lte(2), pipe(
+    head,
+    v => always(`${v}s`)
+  )],
+  [T, v => always(v)]
+]))
+// export const addPluralForm = curryN(2, (metric: string, val: number) => pluralForm(metric)(val))

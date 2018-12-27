@@ -16,7 +16,7 @@
     "url": "https://github.com/dmfilipenko/cursor-traveler"
   },
   "dependencies": {
-    "ramda": "^0.25.0",
+    "ramda": "^0.26.1",
     "rxjs": "6.3.1"
   },
   "devDependencies": {
@@ -24,7 +24,7 @@
     "@types/chrome": "0.0.75",
     "@types/jest": "^23.3.2",
     "@types/node": "^10.11.3",
-    "@types/ramda": "^0.25.38",
+    "@types/ramda": "^0.25.45",
     "@types/rx": "^4.1.1",
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.2",
