@@ -16,7 +16,7 @@ export const metricValueToList = curryN(2,
 export const toFixedCurr = curry((num: number, val: number) => val.toFixed(num))
 export const addPluralToMetric = curry(
   juxt([
-    flip(identity), 
+    identity, 
     addPluralForm
   ])
 )

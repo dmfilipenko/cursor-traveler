@@ -19,3 +19,5 @@ export enum UnitsShort {
   YARD = 'yd',
   MILE = 'ml',
 }
+
+export type UnitSystem = 'imperial' | 'metric'

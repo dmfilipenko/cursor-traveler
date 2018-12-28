@@ -1,10 +1,9 @@
 import { bindCallback, fromEventPattern } from 'rxjs';
-import { pluck } from 'rxjs/operators';
+import { pluck, tap } from 'rxjs/operators';
 
-export const getStorage$ = (value: string) => bindCallback<string, any>(chrome.storage.local.get)(value).pipe(
-    pluck(value)
+export const getStorage$ = (value: string[]) => bindCallback<string[], any>(chrome.storage.local.get)(value).pipe(
+    pluck.apply(null, value),
 )
-
 
 type Handler = (changes: {[key: string]: StorageChange}, areaName: string) => void;
 
