@@ -6,6 +6,7 @@ export const getStorage$ = (value: string) => {
   return Observable.create(observer => {
     chrome.storage.local.get([value], val => {
         observer.next(val)
+        observer.complete()
     })
     return null
   }).pipe(
