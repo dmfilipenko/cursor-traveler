@@ -1,9 +1,9 @@
-declare module '*.css';
-interface StorageChange {
-    /** Optional. The new value of the item, if there is a new value. */
-    newValue?: any;
-    /** Optional. The old value of the item, if there was an old value. */
-    oldValue?: any;
-}
+// Global analytics function (Google Analytics)
+declare function ga(command: string, ...fields: any[]): void;
 
-declare var ga: any;
+// Chrome extension globals are already handled by @types/chrome
+declare global {
+  interface Window {
+    clearStorage?: () => void;
+  }
+} 
