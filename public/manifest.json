@@ -34,8 +34,5 @@
   "permissions": [
     "storage",
     "alarms"
-  ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self' https://www.googletagmanager.com; object-src 'self'"
-  }
+  ]
 }

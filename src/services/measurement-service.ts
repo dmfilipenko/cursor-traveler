@@ -16,7 +16,7 @@ export interface MeasurementService {
   ) => Effect.Effect<FormattedMeasurement, MeasurementError>
   readonly convertFromMillimeters: (total: number) => Effect.Effect<FormattedMeasurement, MeasurementError>
   readonly getUnitSymbolForMillimeters: (total: number) => Effect.Effect<string, MeasurementError>
-  readonly convertPixelsToMillimeters: (pixels: number) => Effect.Effect<number, MeasurementError>
+  
 }
 
 export const MeasurementService = Context.GenericTag<MeasurementService>("@services/MeasurementService")
@@ -57,13 +57,5 @@ export const MeasurementServiceLive = Layer.succeed(
     convertPixelsTo: convertPixels,
     convertFromMillimeters: convertFromMillimeters,
     getUnitSymbolForMillimeters: getUnitSymbolForMillimeters,
-    convertPixelsToMillimeters: (pixels: number) => 
-      pixelToMillimeters(pixels).pipe(
-        Effect.catchAll((error) => Effect.fail(new MeasurementError({
-          reason: "conversion_failed",
-          input: pixels,
-          cause: error
-        })))
-      )
   })
 ) 
