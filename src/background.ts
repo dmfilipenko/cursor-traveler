@@ -1,4 +1,4 @@
-import { Effect, Layer } from 'effect'
+import { Effect, Layer, Array, Option, Schema } from 'effect'
 import { StorageService, StorageServiceLive } from './services/storage-service'
 import { MessagingService, MessagingServiceLive } from './services/messaging-service'
 import { BadgeService, BadgeServiceLive } from './services/badge-service'
@@ -28,6 +28,41 @@ const setupKeepalive = (): Effect.Effect<void, never, never> =>
     })
   })
 
+// Schema for valid distance values (following calculation-service.ts pattern)
+const DistanceSchema = Schema.Number.pipe(
+  Schema.filter(n => n >= 0 && !isNaN(n) && n < 1000000) // 1km max reasonable distance
+)
+
+// Domain-specific validation for storage entries
+const isValidTimestampKey = (key: string): boolean => {
+  const timestamp = parseInt(key, 10)
+  return !isNaN(timestamp) && timestamp > 0 && timestamp <= Date.now()
+}
+
+const isValidDistanceValue = (value: any): value is number => {
+  return typeof value === 'number' && 
+         !isNaN(value) && 
+         value >= 0 && 
+         value < 1000000 // 1km seems reasonable as max daily distance
+}
+
+const isValidStorageEntry = ([key, value]: [string, any]): boolean =>
+  isValidTimestampKey(key) && isValidDistanceValue(value)
+
+// Effect-based distance validation
+const validateDistance = (distance: unknown): Effect.Effect<number, MeasurementError> =>
+  Effect.gen(function* () {
+    const result = Schema.decodeUnknownEither(DistanceSchema)(distance)
+    if (result._tag === "Right") {
+      return result.right
+    }
+    return yield* Effect.fail(new MeasurementError({
+      reason: "invalid_pixels",
+      input: typeof distance === 'number' ? distance : undefined,
+      cause: result.left
+    }))
+  })
+
 const cleanStorage = (): Effect.Effect<void, never, StorageService> =>
   Effect.gen(function* () {
     const storageService = yield* StorageService
@@ -35,18 +70,11 @@ const cleanStorage = (): Effect.Effect<void, never, StorageService> =>
       Effect.catchAll(() => Effect.succeed({}))
     )
     
-    const keysToRemove: string[] = []
-    
-    for (const [key, value] of Object.entries(storageData)) {
-      const shouldRemove = 
-        key === 'test' || 
-        typeof value === 'string' ||
-        (typeof value === 'number' && (isNaN(value) || value < 0 || value > 10000))
-      
-      if (shouldRemove) {
-        keysToRemove.push(key)
-      }
-    }
+    const keysToRemove = Array.filterMap(
+      Object.entries(storageData),
+      ([key, value]) => 
+        isValidStorageEntry([key, value]) ? Option.none() : Option.some(key)
+    )
     
     if (keysToRemove.length > 0) {
       yield* storageService.remove(keysToRemove).pipe(
@@ -55,40 +83,32 @@ const cleanStorage = (): Effect.Effect<void, never, StorageService> =>
     }
   })
 
-const processDistanceMessage = (distance: number): Effect.Effect<any, StorageError | BadgeError | MeasurementError, StorageService | DateService | BadgeService | CalculationService | MeasurementService> =>
+const processDistanceMessage = (distance: unknown): Effect.Effect<{ success: true }, StorageError | BadgeError | MeasurementError, StorageService | DateService | BadgeService | CalculationService | MeasurementService> =>
   Effect.gen(function* () {
-    if (typeof distance !== 'number' || isNaN(distance)) {
-      return { success: false, error: 'Invalid distance' }
-    }
+    const validDistance = yield* validateDistance(distance)
     
     const dateService = yield* DateService
     const storageService = yield* StorageService
     const badgeService = yield* BadgeService
     
     const timestamp = yield* dateService.getDayStartTimestamp()
-    const existingData = yield* storageService.get([timestamp.toString()]).pipe(
-      Effect.catchAll(() => Effect.succeed({}))
-    )
+    const existingData = yield* storageService.get([timestamp.toString()])
     
     const existingValue = (existingData as Record<string, number>)[timestamp.toString()] || 0
-    const totalDistance = distance + existingValue
+    const totalDistance = validDistance + existingValue
     
-    yield* storageService.set({ [timestamp.toString()]: totalDistance }).pipe(
-      Effect.catchAll(() => Effect.succeed(void 0))
-    )
+    yield* storageService.set({ [timestamp.toString()]: totalDistance })
     
     yield* badgeService.updateFromStorage()
     
-    return { success: true }
+    return { success: true } as const
   })
 
 const handleMessage = (message: ChromeMessage): Effect.Effect<any, StorageError | BadgeError | MeasurementError, StorageService | DateService | BadgeService | CalculationService | MeasurementService> =>
   Effect.gen(function* () {
     switch (message.type) {
       case "distance":
-        return yield* processDistanceMessage(message.data as number)
-      case "test":
-        return { success: true, message: 'Background communication successful' }
+        return yield* processDistanceMessage(message.data) // No type cast needed
       default:
         return { success: false, error: 'Unknown message type' }
     }

@@ -23,7 +23,7 @@ export interface StorageEntry {
 
 export interface ChromeMessage {
   readonly _tag: "ChromeMessage"
-  readonly type: "distance" | "test" | "badge_update"
+  readonly type: "distance" | "badge_update"
   readonly data: unknown
   readonly sender?: chrome.runtime.MessageSender
 }

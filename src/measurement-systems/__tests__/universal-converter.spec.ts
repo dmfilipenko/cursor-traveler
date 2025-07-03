@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { Effect } from 'effect'
 import { 
-  convertPixelsTo,
+  convertPixelsToById,
   convertBetween,
   convertPixelsToSystem,
   convertBetweenSystems,
@@ -51,9 +51,9 @@ afterEach(() => {
 })
 
 describe('Universal Converter', () => {
-  describe('convertPixelsTo', () => {
+  describe('convertPixelsToById (legacy)', () => {
     it('should convert pixels to metric system', async () => {
-      const result = await Effect.runPromise(convertPixelsTo(137.8, 'metric'))
+      const result = await Effect.runPromise(convertPixelsToById(137.8, 'metric'))
       
       expect(result).toEqual({
         value: expect.any(Number),
@@ -66,7 +66,7 @@ describe('Universal Converter', () => {
     })
 
     it('should convert pixels to imperial system', async () => {
-      const result = await Effect.runPromise(convertPixelsTo(245.7, 'imperial'))
+      const result = await Effect.runPromise(convertPixelsToById(245.7, 'imperial'))
       
       expect(result.unit.symbol).toBe('in')
       expect(result.formatted).toContain('inch')
@@ -74,20 +74,20 @@ describe('Universal Converter', () => {
 
     it('should handle astronomical system for large values', async () => {
       // Very large pixel value to trigger astronomical units
-      const result = await Effect.runPromise(convertPixelsTo(89432176.3, 'astronomical'))
+      const result = await Effect.runPromise(convertPixelsToById(89432176.3, 'astronomical'))
       
       expect(result.unit.symbol).toBe('AU')
       expect(result.formatted).toContain('astronomical unit')
     })
 
     it('should fail with invalid system ID', async () => {
-      const result = Effect.runPromise(convertPixelsTo(123.4, 'invalid'))
+      const result = Effect.runPromise(convertPixelsToById(123.4, 'invalid'))
       
       await expect(result).rejects.toThrow()
     })
 
     it('should fail with negative pixels', async () => {
-      const result = Effect.runPromise(convertPixelsTo(-67.2, 'metric'))
+      const result = Effect.runPromise(convertPixelsToById(-67.2, 'metric'))
       
       await expect(result).rejects.toThrow('Pixel value cannot be negative')
     })
@@ -278,7 +278,7 @@ describe('Universal Converter', () => {
       }
       mockCreateElement.mockReturnValue(mockElement)
 
-      const result = await Effect.runPromise(convertPixelsTo(96.5, 'metric'))
+      const result = await Effect.runPromise(convertPixelsToById(96.5, 'metric'))
       
       // Should account for higher DPI (result should be smaller physical size)
       expect(result.value).toBeLessThan(100) // Less than 100mm
@@ -299,7 +299,7 @@ describe('Universal Converter', () => {
         writable: true
       })
 
-      const result = await Effect.runPromise(convertPixelsTo(128.3, 'metric'))
+      const result = await Effect.runPromise(convertPixelsToById(128.3, 'metric'))
       
       expect(result.value).toBeGreaterThan(0)
     })
@@ -310,7 +310,7 @@ describe('Universal Converter', () => {
         throw new Error('DOM not available')
       })
 
-      const result = await Effect.runPromise(convertPixelsTo(73.9, 'metric'))
+      const result = await Effect.runPromise(convertPixelsToById(73.9, 'metric'))
       
       // Should still work with fallback
       expect(result.value).toBeGreaterThan(0)
@@ -355,7 +355,7 @@ describe('Universal Converter', () => {
 
   describe('Precision and Formatting', () => {
     it('should format values with correct precision', async () => {
-      const result = await Effect.runPromise(convertPixelsTo(187.4, 'metric'))
+      const result = await Effect.runPromise(convertPixelsToById(187.4, 'metric'))
       
       // Check that formatted string has reasonable precision
       expect(result.formatted).toMatch(/^\d+(\.\d{1,2})? \w+$/)
@@ -365,7 +365,7 @@ describe('Universal Converter', () => {
       // Test with a very large value that would trigger astronomical units
       // Need an extremely large value to reach AU threshold
       const pixels = 8.7e15 // Extremely large
-      const result = await Effect.runPromise(convertPixelsTo(pixels, 'astronomical'))
+      const result = await Effect.runPromise(convertPixelsToById(pixels, 'astronomical'))
       
       expect(result.unit.symbol).toBe('AU')
       expect(result.value).toBeGreaterThan(0)
@@ -385,21 +385,21 @@ describe('Universal Converter', () => {
   describe('Error Handling', () => {
     it('should provide descriptive error messages', async () => {
       try {
-        await Effect.runPromise(convertPixelsTo(234.6, 'nonexistent'))
+        await Effect.runPromise(convertPixelsToById(234.6, 'nonexistent'))
       } catch (error) {
         expect((error as Error).message).toContain('nonexistent')
       }
     })
 
     it('should handle zero pixels correctly', async () => {
-      const result = await Effect.runPromise(convertPixelsTo(0, 'metric'))
+      const result = await Effect.runPromise(convertPixelsToById(0, 'metric'))
       
       expect(result.value).toBe(0)
       expect(result.formatted).toBe('0 millimeter')
     })
 
     it('should handle very small positive values', async () => {
-      const result = await Effect.runPromise(convertPixelsTo(0.1, 'metric'))
+      const result = await Effect.runPromise(convertPixelsToById(0.1, 'metric'))
       
       expect(result.value).toBeGreaterThan(0)
       expect(result.unit.symbol).toBe('mm')

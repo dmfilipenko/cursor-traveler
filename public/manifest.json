@@ -27,10 +27,15 @@
     "service_worker": "src/background.ts"
   },
   "host_permissions": [
-    "<all_urls>"
+    "<all_urls>",
+    "https://www.google-analytics.com/*",
+    "https://www.googletagmanager.com/*"
   ],
   "permissions": [
     "storage",
     "alarms"
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://www.googletagmanager.com; object-src 'self'"
+  }
 }

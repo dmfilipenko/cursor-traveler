@@ -21,9 +21,10 @@ export {
 // Export main converter functions
 export { 
   convertPixelsTo,
+  convertPixelsToById,
   convertBetween,
   convertPixelsToSystem,
   convertBetweenSystems,
   getUnitSymbol,
-
+  pixelToMillimeters
 } from './universal-converter' 

@@ -1,58 +1,61 @@
-import { Effect, Context, Layer, Schema, Either, Option, Array } from 'effect'
+import { sync, gen } from 'effect/Effect'
+import type { Effect } from 'effect'
+import { GenericTag } from 'effect/Context'
+import { succeed } from 'effect/Layer'
+import { Number as NumberSchema, NumberFromString, filter, decodeUnknownEither } from 'effect/Schema'
+import { isRight } from 'effect/Either'
+import { some, none } from 'effect/Option'
+import type { Option } from 'effect/Option'
+import { filterMap, reduce } from 'effect/Array'
 
 export interface CalculationService {
   readonly calculateTotal: (data: Record<string, any>) => Effect.Effect<number, never>
   readonly filterValidValues: (data: Record<string, any>) => Effect.Effect<number[], never>
 }
 
-export const CalculationService = Context.GenericTag<CalculationService>("@services/CalculationService")
+export const CalculationService = GenericTag<CalculationService>("@services/CalculationService")
 
 // Schema for positive numbers
-const PositiveNumberSchema = Schema.Number.pipe(
-  Schema.filter(n => n >= 0 && !isNaN(n))
+const PositiveNumberSchema = NumberSchema.pipe(
+  filter((n: number) => n >= 0 && !isNaN(n))
 )
 
 // Schema for string that can be converted to positive number
-const PositiveNumberFromStringSchema = Schema.NumberFromString.pipe(
-  Schema.filter(n => n >= 0 && !isNaN(n))
+const PositiveNumberFromStringSchema = NumberFromString.pipe(
+  filter((n: number) => n >= 0 && !isNaN(n))
 )
 
-const parseValue = (value: unknown): Option.Option<number> => {
+const parseValue = (value: unknown): Option<number> => {
   // Try as number first
-  const numberResult = Schema.decodeUnknownEither(PositiveNumberSchema)(value)
-  if (Either.isRight(numberResult)) {
-    return Option.some(numberResult.right)
+  const numberResult = decodeUnknownEither(PositiveNumberSchema)(value)
+  if (isRight(numberResult)) {
+    return some(numberResult.right)
   }
   
   // Try as string that converts to number
-  const stringResult = Schema.decodeUnknownEither(PositiveNumberFromStringSchema)(value)
-  if (Either.isRight(stringResult)) {
-    return Option.some(stringResult.right)
+  const stringResult = decodeUnknownEither(PositiveNumberFromStringSchema)(value)
+  if (isRight(stringResult)) {
+    return some(stringResult.right)
   }
   
-  return Option.none()
+  return none()
 }
 
 const filterValidValues = (data: Record<string, any>): Effect.Effect<number[], never> =>
-  Effect.sync(() => {
+  sync(() => {
     const values = Object.values(data)
-    return Array.filterMap(values, parseValue)
+    return filterMap(values, parseValue)
   })
 
 const calculateTotal = (data: Record<string, any>): Effect.Effect<number, never> =>
-  Effect.gen(function* () {
-    console.log('🧮 Calculation: Input data:', data)
+  gen(function* () {
     
     const numericValues = yield* filterValidValues(data)
-    console.log('🧮 Calculation: Valid numeric values:', numericValues)
-    
-    const total = Array.reduce(numericValues, 0, (sum, value) => sum + value)
-    console.log('🧮 Calculation: Total:', total)
-    
+    const total = reduce(numericValues, 0, (sum: number, value: number) => sum + value)
     return total
   })
 
-export const CalculationServiceLive = Layer.succeed(
+export const CalculationServiceLive = succeed(
   CalculationService,
   CalculationService.of({
     calculateTotal,

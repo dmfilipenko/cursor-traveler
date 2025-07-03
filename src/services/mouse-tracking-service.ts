@@ -1,7 +1,7 @@
 import { Effect, Stream } from 'effect'
 import { MouseTrackingError } from '../domain/errors'
 import { MousePosition } from '../domain/models'
-import { ValidationResult } from '../domain/types'
+import { pixelToMillimeters } from '../measurement-systems'
 
 export interface MouseTrackingService {
   readonly processEvent: (
@@ -9,7 +9,6 @@ export interface MouseTrackingService {
     previousEvent: MouseEvent | null
   ) => Effect.Effect<number, MouseTrackingError>
   readonly createStream: () => Stream.Stream<number, MouseTrackingError>
-  readonly validateMovement: (position: MousePosition) => Effect.Effect<ValidationResult, never>
 }
 
 const calculateDistance = (position: MousePosition): number => {
@@ -19,89 +18,39 @@ const calculateDistance = (position: MousePosition): number => {
   )
 }
 
-const detectDpi = (): Effect.Effect<number, MouseTrackingError> =>
-  Effect.try({
-    try: () => {
-      const testElement = document.createElement('div')
-      testElement.style.width = '1in'
-      testElement.style.height = '1in'
-      testElement.style.position = 'absolute'
-      testElement.style.left = '-1000px'
-      testElement.style.top = '-1000px'
-      testElement.style.visibility = 'hidden'
-      
-      document.body.appendChild(testElement)
-      const pixelsPerInch = testElement.offsetWidth
-      document.body.removeChild(testElement)
-      
-      if (pixelsPerInch > 50 && pixelsPerInch < 500) {
-        return pixelsPerInch
-      }
-      
-      return 96 * (window.devicePixelRatio || 1)
-    },
-    catch: () => new MouseTrackingError({
-      reason: "dpi_detection_failed",
-      details: "Could not detect DPI, using fallback"
-    })
-  })
-
-const convertPixelsToMillimeters = (pixels: number): Effect.Effect<number, MouseTrackingError> =>
-  Effect.gen(function* () {
-    const dpi = yield* detectDpi().pipe(
-      Effect.catchAll(() => Effect.succeed(96))
-    )
-    
-    const inches = pixels / dpi
-    const millimeters = inches * 25.4
-    
-    if (isNaN(millimeters) || millimeters < 0) {
-      return yield* Effect.fail(new MouseTrackingError({
-        reason: "calculation_error",
-        details: `Invalid conversion result: ${millimeters}`
-      }))
-    }
-    
-    return millimeters
-  })
-
-const validateMovement = (position: MousePosition): Effect.Effect<ValidationResult, never> =>
-  Effect.succeed({
-    isValid: Math.abs(position.prevX - position.currX) < 300 && 
-             Math.abs(position.prevY - position.currY) < 300,
-    reason: Math.abs(position.prevX - position.currX) >= 300 || 
-            Math.abs(position.prevY - position.currY) >= 300 
-            ? "Movement too large" 
-            : undefined
-  })
+const validateMovement = (position: MousePosition): boolean =>
+    Math.abs(position.prevX - position.currX) < 300 && 
+    Math.abs(position.prevY - position.currY) < 300
 
 const processMouseEvent = (
   event: MouseEvent, 
   previousEvent: MouseEvent | null
-): Effect.Effect<number, MouseTrackingError> =>
-  Effect.gen(function* () {
-    if (!previousEvent) {
-      return 0
-    }
+): Effect.Effect<number, MouseTrackingError> => {
+  if (!previousEvent) {
+    return Effect.succeed(0)
+  }
 
-    const position: MousePosition = {
-      _tag: "MousePosition",
-      prevX: previousEvent.pageX,
-      prevY: previousEvent.pageY,
-      currX: event.pageX,
-      currY: event.pageY
-    }
+  const position: MousePosition = {
+    _tag: "MousePosition",
+    prevX: previousEvent.pageX,
+    prevY: previousEvent.pageY,
+    currX: event.pageX,
+    currY: event.pageY
+  }
 
-    const validation = yield* validateMovement(position)
-    if (!validation.isValid) {
-      return 0
-    }
+  if (!validateMovement(position)) {
+    return Effect.succeed(0)
+  }
 
-    const pixelDistance = calculateDistance(position)
-    const millimeters = yield* convertPixelsToMillimeters(pixelDistance)
-    
-    return millimeters
-  })
+  const pixelDistance = calculateDistance(position)
+  
+  return pixelToMillimeters(pixelDistance).pipe(
+    Effect.catchAll((error) => Effect.fail(new MouseTrackingError({
+      reason: "calculation_error",
+      details: `Pixel conversion failed: ${error}`
+    })))
+  )
+}
 
 const createMouseStream = (): Stream.Stream<number, MouseTrackingError> =>
   Stream.async<number, MouseTrackingError>((emit) => {
@@ -134,5 +83,4 @@ const createMouseStream = (): Stream.Stream<number, MouseTrackingError> =>
 export const MouseTrackingServiceLive: MouseTrackingService = {
   processEvent: processMouseEvent,
   createStream: createMouseStream,
-  validateMovement: validateMovement
 } 

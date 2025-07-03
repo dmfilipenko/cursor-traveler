@@ -1,6 +1,7 @@
 import { Big } from 'big.js'
+import { Data, Schema } from 'effect'
 
-export type MessageType = "distance" | "test" | "badge_update"
+export type MessageType = "distance" | "badge_update"
 
 export type StorageOperation = "get" | "set" | "remove" | "clear"
 
@@ -70,4 +71,25 @@ export interface FormattedMeasurement {
   readonly value: number
   readonly unit: MeasurementUnit
   readonly formatted: string
-} 
+}
+
+// Effect-based measurement system type (replacing string union)
+export class MeasurementSystemMetric extends Data.TaggedClass("Metric")<{}> {}
+export class MeasurementSystemImperial extends Data.TaggedClass("Imperial")<{}> {}
+export class MeasurementSystemAstronomical extends Data.TaggedClass("Astronomical")<{}> {}
+export class MeasurementSystemNautical extends Data.TaggedClass("Nautical")<{}> {}
+
+export type MeasurementSystemType = 
+  | MeasurementSystemMetric
+  | MeasurementSystemImperial
+  | MeasurementSystemAstronomical
+  | MeasurementSystemNautical
+
+// Constructor helpers
+export const MeasurementSystem = {
+  Metric: () => new MeasurementSystemMetric(),
+  Imperial: () => new MeasurementSystemImperial(),
+  Astronomical: () => new MeasurementSystemAstronomical(),
+  Nautical: () => new MeasurementSystemNautical()
+} as const
+

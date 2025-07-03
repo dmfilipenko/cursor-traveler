@@ -5,6 +5,18 @@ import { MeasurementService, MeasurementServiceLive } from './services/measureme
 import { FormattedMeasurement } from './domain/types'
 import { StorageError, MeasurementError, RenderError } from './domain/errors'
 
+// Type declaration for analytics functions
+declare global {
+  interface Window {
+    analytics?: {
+      trackExtensionEvent: (eventName: string, parameters?: Record<string, any>) => void
+      trackPageView: (pageName: string) => void
+      trackPopupOpen: () => void
+      trackMouseDistance: (distance: number, unit: string) => void
+    }
+  }
+}
+
 // Create main service layer
 const MainLayer = Layer.mergeAll(
   StorageServiceLive,
@@ -12,11 +24,18 @@ const MainLayer = Layer.mergeAll(
   MeasurementServiceLive
 )
 
-// Analytics function
+// Analytics functions for GA4
 const sendPageview = (): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
-    if (typeof ga !== 'undefined') {
-      ga('send', 'pageview')
+    if (typeof window !== 'undefined' && window.analytics) {
+      window.analytics.trackPageView('popup')
+    }
+  })
+
+const trackPopupInteraction = (): Effect.Effect<void, never, never> =>
+  Effect.sync(() => {
+    if (typeof window !== 'undefined' && window.analytics) {
+      window.analytics.trackPopupOpen()
     }
   })
 
@@ -94,6 +113,7 @@ const setupPeriodicRefresh = (): Effect.Effect<void, never, never> =>
 // Main program
 const program = Effect.gen(function* () {
   yield* sendPageview()
+  yield* trackPopupInteraction()
   yield* renderPopup()
   yield* setupStorageListener()
   yield* setupPeriodicRefresh()

@@ -1,6 +1,7 @@
-import { Effect } from 'effect'
+import { fail, succeed, flatMap } from 'effect/Effect'
+import type { Effect } from 'effect'
 import { Big } from 'big.js'
-import { MeasurementSystem, MeasurementUnit, ConversionError, FormattedMeasurement, SystemNotFoundError } from '../domain/types'
+import { MeasurementSystem, MeasurementUnit, ConversionError, FormattedMeasurement, SystemNotFoundError, MeasurementSystemType } from '../domain/types'
 import { MetricSystem, ImperialSystem, AstronomicalSystem, NauticalSystem } from './systems'
 
 // Constants
@@ -47,16 +48,16 @@ const getActualDPI = (): number => {
 }
 
 // Improved pixel to millimeter conversion
-const pixelToMillimeters = (pixels: number): Effect.Effect<number, ConversionError, never> => {
+export const pixelToMillimeters = (pixels: number): Effect.Effect<number, ConversionError, never> => {
   if (pixels < 0) {
-    return Effect.fail(ConversionError('Pixel value cannot be negative'))
+    return fail(ConversionError('Pixel value cannot be negative'))
   }
   
   const dpi = getActualDPI()
   const inches = pixels / dpi
   const mm = inches * MEASUREMENT_CONSTANTS.MM_PER_INCH
   
-  return Effect.succeed(mm)
+  return succeed(mm)
 }
 
 // Simple system lookup by ID
@@ -67,6 +68,16 @@ const getSystemById = (systemId: string): MeasurementSystem | undefined => {
     case AstronomicalSystem.id: return AstronomicalSystem
     case NauticalSystem.id: return NauticalSystem
     default: return undefined
+  }
+}
+
+// Convert MeasurementSystemType to MeasurementSystem object (proper Effect approach)
+const getSystemFromType = (systemType: MeasurementSystemType): MeasurementSystem => {
+  switch (systemType._tag) {
+    case "Metric": return MetricSystem
+    case "Imperial": return ImperialSystem
+    case "Astronomical": return AstronomicalSystem
+    case "Nautical": return NauticalSystem
   }
 }
 
@@ -96,22 +107,31 @@ const convertWithinSystem = (
   const convertedValue = safeDivide(baseValue, unit.factor)
   const rounded = parseFloat(convertedValue.toFixed(unit.precision))
   
-  return Effect.succeed({
+  return succeed({
     value: rounded,
     unit,
     formatted: `${rounded} ${unit.name}`
   })
 }
 
-// Universal converter from pixels to any measurement system (by ID)
+// Universal converter from pixels to any measurement system (by MeasurementSystemType - PREFERRED)
 export const convertPixelsTo = (
+  pixels: number,
+  systemType: MeasurementSystemType
+): Effect.Effect<FormattedMeasurement, ConversionError, never> => {
+  const targetSystem = getSystemFromType(systemType)
+  return convertPixelsToSystem(pixels, targetSystem)
+}
+
+// Legacy version using string IDs (for backward compatibility)
+export const convertPixelsToById = (
   pixels: number,
   targetSystemId: string
 ): Effect.Effect<FormattedMeasurement, ConversionError, never> => {
   // Get target system
   const targetSystem = getSystemById(targetSystemId)
   if (!targetSystem) {
-    return Effect.fail(SystemNotFoundError(targetSystemId))
+    return fail(SystemNotFoundError(targetSystemId))
   }
 
   return convertPixelsToSystem(pixels, targetSystem)
@@ -128,10 +148,10 @@ export const convertBetween = (
   const toSystem = getSystemById(toSystemId)
   
   if (!fromSystem) {
-    return Effect.fail(SystemNotFoundError(fromSystemId))
+    return fail(SystemNotFoundError(fromSystemId))
   }
   if (!toSystem) {
-    return Effect.fail(SystemNotFoundError(toSystemId))
+    return fail(SystemNotFoundError(toSystemId))
   }
 
   return convertBetweenSystems(value, fromSystem, toSystem)
@@ -144,11 +164,11 @@ export const getUnitSymbol = (
 ): Effect.Effect<string, ConversionError, never> => {
   const system = getSystemById(systemId)
   if (!system) {
-    return Effect.fail(SystemNotFoundError(systemId))
+    return fail(SystemNotFoundError(systemId))
   }
 
   const unit = findBestUnit(value, system)
-  return Effect.succeed(unit.symbol)
+  return succeed(unit.symbol)
 }
 
 // Direct system object versions (preferred)
@@ -156,7 +176,7 @@ export const convertPixelsToSystem = (
   pixels: number,
   targetSystem: MeasurementSystem
 ): Effect.Effect<FormattedMeasurement, ConversionError, never> =>
-  Effect.flatMap(
+  flatMap(
     pixelToMillimeters(pixels),
     (millimeters) => convertWithinSystem(millimeters, targetSystem)
   )

@@ -38,8 +38,6 @@ const setupMessageListener = <T = any>(
 ): Effect.Effect<void, never> =>
   Effect.sync(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log('📨 Message received:', message, 'from:', sender.tab?.url)
-      
       const chromeMessage: ChromeMessage = {
         _tag: "ChromeMessage",
         type: message.type,
@@ -62,8 +60,6 @@ const setupMessageListener = <T = any>(
       
       return true // Keep response channel open for async response
     })
-    
-    console.log('📨 Message listener set up')
   })
 
 export const MessagingServiceLive = Layer.succeed(

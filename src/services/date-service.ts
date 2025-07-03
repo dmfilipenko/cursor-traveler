@@ -1,14 +1,12 @@
 import { Effect, Context, Layer } from 'effect'
 
 export interface DateService {
-  readonly getCurrentTimestamp: () => Effect.Effect<number, never>
   readonly getDayStartTimestamp: (date?: Date) => Effect.Effect<number, never>
 }
 
 export const DateService = Context.GenericTag<DateService>("@services/DateService")
 
-const getCurrentTimestamp = (): Effect.Effect<number, never> =>
-  Effect.sync(() => Date.now())
+
 
 const getDayStartTimestamp = (date?: Date): Effect.Effect<number, never> =>
   Effect.sync(() => {
@@ -23,7 +21,6 @@ const getDayStartTimestamp = (date?: Date): Effect.Effect<number, never> =>
 export const DateServiceLive = Layer.succeed(
   DateService,
   DateService.of({
-    getCurrentTimestamp,
     getDayStartTimestamp
   })
 ) 

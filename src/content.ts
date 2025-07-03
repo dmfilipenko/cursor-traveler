@@ -22,20 +22,6 @@ const sendMessage = <T = any>(message: ChromeMessage): Effect.Effect<T, ChromeRu
     })
   })
 
-// Test background communication
-const testBackgroundCommunication = (): Effect.Effect<void, never, never> =>
-  Effect.gen(function* () {
-    const testMessage: ChromeMessage = {
-      _tag: "ChromeMessage",
-      type: "test",
-      data: "hello from content"
-    }
-    
-    yield* sendMessage(testMessage).pipe(
-      Effect.catchAll(() => Effect.succeed(void 0))
-    )
-  })
-
 // Process mouse movements and send to background
 const processMouseMovements = (): Effect.Effect<void, never, never> =>
   Effect.gen(function* () {
@@ -68,7 +54,6 @@ const processMouseMovements = (): Effect.Effect<void, never, never> =>
 // Main content initialization
 const initialize = (): Effect.Effect<void, never, never> =>
   Effect.gen(function* () {
-    yield* testBackgroundCommunication()
     yield* processMouseMovements()
   })
 
