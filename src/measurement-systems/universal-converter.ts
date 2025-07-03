@@ -103,10 +103,25 @@ const convertWithinSystem = (
   baseValue: number,
   system: MeasurementSystem
 ): Effect.Effect<FormattedMeasurement, ConversionError, never> => {
-  const unit = findBestUnit(baseValue, system)
-  const convertedValue = safeDivide(baseValue, unit.factor)
+  let unit = findBestUnit(baseValue, system)
+  let convertedValue = safeDivide(baseValue, unit.factor)
+
+  const getFactor = (unit: MeasurementUnit) =>
+    unit.factor instanceof Big ? unit.factor : new Big(unit.factor)
+
+  if (convertedValue.lt(1) && getFactor(unit).gt(1)) {
+    const sortedUnits = [...system.units].sort((a, b) =>
+      getFactor(a).cmp(getFactor(b))
+    )
+    const currentIndex = sortedUnits.findIndex((u) => u.symbol === unit.symbol)
+    if (currentIndex > 0) {
+      unit = sortedUnits[currentIndex - 1]
+      convertedValue = safeDivide(baseValue, unit.factor)
+    }
+  }
+
   const rounded = parseFloat(convertedValue.toFixed(unit.precision))
-  
+
   return succeed({
     value: rounded,
     unit,
