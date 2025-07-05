@@ -23,7 +23,7 @@ const sendMessage = <T = any>(message: ChromeMessage): Effect.Effect<T, ChromeRu
   })
 
 // Process mouse movements and send to background
-const processMouseMovements = (): Effect.Effect<void, never, never> =>
+const processMouseMovements = (): Effect.Effect<void, ChromeRuntimeError, never> =>
   Effect.gen(function* () {
     const mouseStream = MouseTrackingServiceLive.createStream()
     
@@ -32,7 +32,6 @@ const processMouseMovements = (): Effect.Effect<void, never, never> =>
         const movements = Chunk.toReadonlyArray(chunk)
         return EffectArray.reduce(movements, 0, (sum: number, value: number) => sum + value)
       }),
-      Stream.filter((total: number) => total > 0),
       Stream.catchAll(() => Stream.empty)
     )
     
@@ -44,30 +43,14 @@ const processMouseMovements = (): Effect.Effect<void, never, never> =>
           data: total
         }
         
-        yield* sendMessage(distanceMessage).pipe(
-          Effect.catchAll(() => Effect.succeed(void 0))
-        )
+        yield* sendMessage(distanceMessage)
       })
-    )
-  })
-
-// Main content initialization
-const initialize = (): Effect.Effect<void, never, never> =>
-  Effect.gen(function* () {
-    yield* processMouseMovements()
-  })
-
-// Main execution
-const main = (): Effect.Effect<void, never, never> =>
-  Effect.gen(function* () {
-    yield* initialize().pipe(
-      Effect.catchAll(() => Effect.succeed(void 0))
     )
   })
 
 // Auto-start when script loads
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => Effect.runFork(main()))
+  document.addEventListener('DOMContentLoaded', () => Effect.runFork(processMouseMovements()))
 } else {
-  Effect.runFork(main())
+  Effect.runFork(processMouseMovements())
 } 

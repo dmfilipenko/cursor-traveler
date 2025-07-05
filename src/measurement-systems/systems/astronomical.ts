@@ -3,7 +3,7 @@ import type { MeasurementSystem } from '../../domain/types'
 
 export const AstronomicalSystem: MeasurementSystem = {
   id: 'astronomical',
-  name: 'Astronomical',
+  name: 'Astro',
   baseUnit: 'mm',
   units: [
     {
