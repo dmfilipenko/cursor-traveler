@@ -2,7 +2,7 @@ import { fail, succeed, flatMap } from 'effect/Effect'
 import type { Effect } from 'effect'
 import { Big } from 'big.js'
 import { MeasurementSystem, MeasurementUnit, ConversionError, FormattedMeasurement, SystemNotFoundError, MeasurementSystemType } from '../domain/types'
-import { MetricSystem, ImperialSystem, AstronomicalSystem, NauticalSystem } from './systems'
+import { MetricSystem, ImperialSystem, NauticalSystem } from './systems'
 
 // Constants
 const DPI_BOUNDS = {
@@ -65,7 +65,6 @@ const getSystemById = (systemId: string): MeasurementSystem | undefined => {
   switch (systemId) {
     case MetricSystem.id: return MetricSystem
     case ImperialSystem.id: return ImperialSystem
-    case AstronomicalSystem.id: return AstronomicalSystem
     case NauticalSystem.id: return NauticalSystem
     default: return undefined
   }
@@ -76,7 +75,6 @@ const getSystemFromType = (systemType: MeasurementSystemType): MeasurementSystem
   switch (systemType._tag) {
     case "Metric": return MetricSystem
     case "Imperial": return ImperialSystem
-    case "Astronomical": return AstronomicalSystem
     case "Nautical": return NauticalSystem
   }
 }

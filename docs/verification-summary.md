@@ -99,7 +99,6 @@ Based on comprehensive codebase analysis conducted on the current state, here's 
   - convertBetween (4 tests) ✅
   - convertPixelsToSystem (4 tests) ✅
   - convertBetweenSystems (4 tests) ✅
-  - AstronomicalSystem specific (3 tests) ✅
   - getUnitSymbol (5 tests) ✅
   - DPI Detection (3 tests) ✅
   - Unit Selection Logic (3 tests) ✅

@@ -7,7 +7,7 @@ import {
   convertBetweenSystems,
   getUnitSymbol
 } from '../universal-converter'
-import { MetricSystem, ImperialSystem, AstronomicalSystem, NauticalSystem } from '../systems'
+import { MetricSystem, ImperialSystem,  NauticalSystem } from '../systems'
 // ConversionError type available if needed
 
 // Mock DOM methods for DPI detection
@@ -136,14 +136,7 @@ describe('Universal Converter', () => {
       expect(result.unit.name).toBe('inch')
     })
 
-    it('should convert pixels to astronomical system object', async () => {
-      // Use a much larger value to reach AU threshold
-      const result = await Effect.runPromise(convertPixelsToSystem(7.5e13, AstronomicalSystem))
-      
-      expect(result.unit.symbol).toBe('AU')
-      expect(result.value).toBeGreaterThan(0)
-    })
-
+    
     it('should convert pixels to nautical system object', async () => {
       const result = await Effect.runPromise(convertPixelsToSystem(1834.9, NauticalSystem))
       
@@ -172,73 +165,8 @@ describe('Universal Converter', () => {
       expect(result.unit.symbol).toBe('nmi')
       expect(result.value).toBe(1)
     })
-
-    it('should convert metric to astronomical system', async () => {
-      // Test with a value that should trigger astronomical units
-      const hugeMmValue = 149597870700000 // 1 AU in mm
-      const result = await Effect.runPromise(
-        convertBetweenSystems(hugeMmValue, MetricSystem, AstronomicalSystem)
-      )
-      
-      expect(result.unit.symbol).toBe('AU')
-      expect(result.value).toBeCloseTo(1, 3)
-    })
-
-    it('should convert imperial to astronomical system', async () => {
-      // Convert a large imperial value to astronomical
-      const largeMmValue = 74798935350000 // 0.5 AU in mm
-      const result = await Effect.runPromise(
-        convertBetweenSystems(largeMmValue, ImperialSystem, AstronomicalSystem)
-      )
-      
-      expect(result.unit.symbol).toBe('AU')
-      expect(result.value).toBeCloseTo(0.5, 3)
-    })
   })
 
-  describe('AstronomicalSystem specific tests', () => {
-    it('should handle light-year conversions', async () => {
-      // Value that should trigger light-year units
-      const lightYearInMm = 9460730472580800000
-      const result = await Effect.runPromise(
-        convertBetweenSystems(lightYearInMm, MetricSystem, AstronomicalSystem)
-      )
-      
-      expect(result.unit.symbol).toBe('ly')
-      expect(result.value).toBeCloseTo(1, 3)
-    })
-
-    it('should handle parsec conversions', async () => {
-      // Value that should trigger parsec units
-      const parsecInMm = 30856775814913672789
-      const result = await Effect.runPromise(
-        convertBetweenSystems(parsecInMm, MetricSystem, AstronomicalSystem)
-      )
-      
-      expect(result.unit.symbol).toBe('pc')
-      expect(result.value).toBeCloseTo(1, 3)
-    })
-
-    it('should select appropriate astronomical unit based on magnitude', async () => {
-      // Small astronomical distance - should use AU
-      const smallAstro = await Effect.runPromise(
-        convertPixelsToSystem(7.5e13, AstronomicalSystem)
-      )
-      expect(smallAstro.unit.symbol).toBe('AU')
-
-      // Very large astronomical distance - still AU after pixel conversion
-      const mediumAstro = await Effect.runPromise(
-        convertPixelsToSystem(4.8e18, AstronomicalSystem)
-      )
-      expect(mediumAstro.unit.symbol).toBe('AU')
-
-      // Extremely large astronomical distance - still AU after pixel conversion
-      const largeAstro = await Effect.runPromise(
-        convertPixelsToSystem(1.6e19, AstronomicalSystem)
-      )
-      expect(largeAstro.unit.symbol).toBe('AU')
-    })
-  })
 
   describe('getUnitSymbol', () => {
     it('should return correct symbol for metric values', async () => {
@@ -372,14 +300,6 @@ describe('Universal Converter', () => {
       expect(result.formatted).toContain('astronomical unit')
     })
 
-    it('should handle fractional astronomical values correctly', async () => {
-      const halfAU = 74798935350000 // 0.5 AU in mm
-      const result = await Effect.runPromise(convertBetweenSystems(halfAU, MetricSystem, AstronomicalSystem))
-      
-      expect(result.unit.symbol).toBe('AU')
-      expect(result.value).toBeCloseTo(0.5, 3)
-      expect(result.formatted).toContain('0.5')
-    })
   })
 
   describe('Error Handling', () => {

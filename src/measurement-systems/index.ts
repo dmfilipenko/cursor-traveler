@@ -13,7 +13,6 @@ export type {
 export { 
   MetricSystem, 
   ImperialSystem, 
-  AstronomicalSystem, 
   NauticalSystem,
   ALL_SYSTEMS 
 } from './systems'
