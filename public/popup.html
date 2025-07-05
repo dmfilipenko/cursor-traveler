@@ -11,6 +11,22 @@
     <div id="root">
       <div class="wrapper">
         <div class="title">Mouse traveled</div>
+        
+        <div class="metric-selector">
+          <div class="toggle-option">
+            <input type="radio" id="metric" name="system" value="metric" checked>
+            <label for="metric">Metric</label>
+          </div>
+          <div class="toggle-option">
+            <input type="radio" id="imperial" name="system" value="imperial">
+            <label for="imperial">Imperial</label>
+          </div>
+          <div class="toggle-option">
+            <input type="radio" id="nautical" name="system" value="nautical">
+            <label for="nautical">Nautical</label>
+          </div>
+        </div>
+        
         <div class="total"></div>
         <div class="unit"></div>
       </div>

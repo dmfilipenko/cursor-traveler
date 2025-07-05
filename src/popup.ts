@@ -2,8 +2,10 @@ import { Effect, Layer } from 'effect'
 import { StorageService, StorageServiceLive } from './services/storage-service'
 import { CalculationService, CalculationServiceLive } from './services/calculation-service'
 import { MeasurementService, MeasurementServiceLive } from './services/measurement-service'
+import { BadgeService, BadgeServiceLive } from './services/badge-service'
 import { FormattedMeasurement } from './domain/types'
-import { StorageError, MeasurementError, RenderError } from './domain/errors'
+import { StorageError, MeasurementError, RenderError, BadgeError } from './domain/errors'
+import { getSystemById } from './measurement-systems'
 
 // Type declaration for analytics functions
 declare global {
@@ -21,7 +23,8 @@ declare global {
 const MainLayer = Layer.mergeAll(
   StorageServiceLive,
   CalculationServiceLive,
-  MeasurementServiceLive
+  MeasurementServiceLive,
+  BadgeServiceLive
 )
 
 // Analytics functions for GA4
@@ -72,7 +75,7 @@ const render = (measurement: FormattedMeasurement): Effect.Effect<void, RenderEr
     })
   })
 
-// Main popup render logic
+// Main popup render logic with selected system
 const renderPopup = (): Effect.Effect<void, StorageError | MeasurementError | RenderError, StorageService | CalculationService | MeasurementService> =>
   Effect.gen(function* () {
     const storageService = yield* StorageService
@@ -80,10 +83,85 @@ const renderPopup = (): Effect.Effect<void, StorageError | MeasurementError | Re
     const measurementService = yield* MeasurementService
 
     const storageData = yield* storageService.get()
+    const selectedSystemId = yield* storageService.getSelectedMeasurementSystem()
+    const selectedSystem = getSystemById(selectedSystemId)
+    
     const total = yield* calculationService.calculateTotal(storageData)
-    const measurement = yield* measurementService.convertFromMillimeters(total)
+    const measurement = yield* measurementService.convertFromMillimeters(total, selectedSystem)
 
     yield* render(measurement)
+  })
+
+// Update badge with current system
+const updateBadgeForSystem = (): Effect.Effect<void, StorageError | MeasurementError | BadgeError, StorageService | CalculationService | MeasurementService | BadgeService> =>
+  Effect.gen(function* () {
+    const storageService = yield* StorageService
+    const calculationService = yield* CalculationService
+    const measurementService = yield* MeasurementService
+    const badgeService = yield* BadgeService
+
+    const storageData = yield* storageService.get()
+    const selectedSystemId = yield* storageService.getSelectedMeasurementSystem()
+    const selectedSystem = getSystemById(selectedSystemId)
+    
+    const total = yield* calculationService.calculateTotal(storageData)
+    const unitSymbol = yield* measurementService.getUnitSymbolForMillimeters(total, selectedSystem)
+    
+    yield* badgeService.setBadgeText(unitSymbol)
+  })
+
+// Load and sync measurement system selector state
+const syncMeasurementSystemSelector = (): Effect.Effect<void, StorageError, StorageService> =>
+  Effect.gen(function* () {
+    const storageService = yield* StorageService
+    const selectedSystemId = yield* storageService.getSelectedMeasurementSystem()
+    
+    const radioButtons = document.querySelectorAll<HTMLInputElement>('input[name="system"]')
+    radioButtons.forEach(radio => {
+      radio.checked = radio.value === selectedSystemId
+    })
+  })
+
+// Setup measurement system selector with event delegation
+const setupMeasurementSystemSelector = (): Effect.Effect<void, StorageError, StorageService> =>
+  Effect.gen(function* () {
+    const storageService = yield* StorageService
+    
+    // Sync initial state
+    yield* syncMeasurementSystemSelector()
+    
+    // Setup event delegation on parent element
+    const selectorContainer = document.querySelector('.metric-selector')
+    if (!selectorContainer) {
+      throw new Error('Metric selector container not found')
+    }
+    
+    const handleSelectorChange = (event: Event): void => {
+      const target = event.target as HTMLInputElement
+      
+      // Check if the target is a radio button with name="system"
+      if (target.type === 'radio' && target.name === 'system' && target.checked) {
+        // Save to storage
+        Effect.runFork(
+          storageService.setSelectedMeasurementSystem(target.value).pipe(
+            Effect.provide(MainLayer)
+          )
+        )
+        
+        // Update display
+        Effect.runFork(
+          renderPopup().pipe(Effect.provide(MainLayer))
+        )
+        
+        // Update badge
+        Effect.runFork(
+          updateBadgeForSystem().pipe(Effect.provide(MainLayer))
+        )
+      }
+    }
+    
+    // Attach single delegated event listener
+    selectorContainer.addEventListener('change', handleSelectorChange)
   })
 
 // Setup storage listener for real-time updates
@@ -91,7 +169,10 @@ const setupStorageListener = (): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
     chrome.storage.onChanged.addListener(() => {
       Effect.runFork(
-        renderPopup().pipe(Effect.provide(MainLayer))
+        Effect.gen(function* () {
+          yield* syncMeasurementSystemSelector()
+          yield* renderPopup()
+        }).pipe(Effect.provide(MainLayer))
       )
     })
   })
@@ -99,21 +180,18 @@ const setupStorageListener = (): Effect.Effect<void, never, never> =>
 // Periodic refresh
 const setupPeriodicRefresh = (): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
-    const interval = setInterval(() => {
+    setInterval(() => {
       Effect.runFork(
         renderPopup().pipe(Effect.provide(MainLayer))
       )
-    }, 2000)
-
-    window.addEventListener('beforeunload', () => {
-      clearInterval(interval)
-    })
+    }, 500)
   })
 
 // Main program
 const program = Effect.gen(function* () {
   yield* sendPageview()
   yield* trackPopupInteraction()
+  yield* setupMeasurementSystemSelector()
   yield* renderPopup()
   yield* setupStorageListener()
   yield* setupPeriodicRefresh()

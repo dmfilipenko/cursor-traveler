@@ -61,12 +61,12 @@ export const pixelToMillimeters = (pixels: number): Effect.Effect<number, Conver
 }
 
 // Simple system lookup by ID
-const getSystemById = (systemId: string): MeasurementSystem | undefined => {
+export const getSystemById = (systemId: string): MeasurementSystem => {
   switch (systemId) {
     case MetricSystem.id: return MetricSystem
     case ImperialSystem.id: return ImperialSystem
     case NauticalSystem.id: return NauticalSystem
-    default: return undefined
+    default: return MetricSystem
   }
 }
 

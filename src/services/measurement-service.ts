@@ -5,17 +5,17 @@ import {
   convertPixelsTo,
   convertBetweenSystems,
   getUnitSymbol,
-  pixelToMillimeters,
   MetricSystem
 } from '../measurement-systems'
+import type { MeasurementSystem } from '../domain/types'
 
 export interface MeasurementService {
   readonly convertPixelsTo: (
     pixels: number, 
     system: MeasurementSystemType
   ) => Effect.Effect<FormattedMeasurement, MeasurementError>
-  readonly convertFromMillimeters: (total: number) => Effect.Effect<FormattedMeasurement, MeasurementError>
-  readonly getUnitSymbolForMillimeters: (total: number) => Effect.Effect<string, MeasurementError>
+  readonly convertFromMillimeters: (total: number, targetSystem?: MeasurementSystem) => Effect.Effect<FormattedMeasurement, MeasurementError>
+  readonly getUnitSymbolForMillimeters: (total: number, targetSystem?: MeasurementSystem) => Effect.Effect<string, MeasurementError>
   
 }
 
@@ -33,8 +33,8 @@ const convertPixels = (
     })))
   )
 
-const convertFromMillimeters = (total: number): Effect.Effect<FormattedMeasurement, MeasurementError> =>
-  convertBetweenSystems(total, MetricSystem, MetricSystem).pipe(
+const convertFromMillimeters = (total: number, targetSystem?: MeasurementSystem): Effect.Effect<FormattedMeasurement, MeasurementError> =>
+  convertBetweenSystems(total, MetricSystem, targetSystem || MetricSystem).pipe(
     Effect.catchAll((error) => Effect.fail(new MeasurementError({
       reason: "conversion_failed",
       input: total,
@@ -42,8 +42,8 @@ const convertFromMillimeters = (total: number): Effect.Effect<FormattedMeasureme
     })))
   )
 
-const getUnitSymbolForMillimeters = (total: number): Effect.Effect<string, MeasurementError> =>
-  getUnitSymbol(total, MetricSystem.id).pipe(
+const getUnitSymbolForMillimeters = (total: number, targetSystem?: MeasurementSystem): Effect.Effect<string, MeasurementError> =>
+  getUnitSymbol(total, (targetSystem || MetricSystem).id).pipe(
     Effect.catchAll((error) => Effect.fail(new MeasurementError({
       reason: "conversion_failed",
       input: total,

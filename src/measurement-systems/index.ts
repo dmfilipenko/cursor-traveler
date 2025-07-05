@@ -25,5 +25,6 @@ export {
   convertPixelsToSystem,
   convertBetweenSystems,
   getUnitSymbol,
+  getSystemById,
   pixelToMillimeters
 } from './universal-converter' 

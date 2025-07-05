@@ -2,13 +2,18 @@ import { Effect, Context, Layer } from 'effect'
 import { StorageError } from '../domain/errors'
 
 export interface StorageService {
-  readonly get: (keys?: string[]) => Effect.Effect<Record<string, number>, StorageError>
-  readonly set: (data: Record<string, number>) => Effect.Effect<void, StorageError>
+  readonly get: (keys?: string[]) => Effect.Effect<Record<string, any>, StorageError>
+  readonly set: (data: Record<string, any>) => Effect.Effect<void, StorageError>
   readonly remove: (keys: string[]) => Effect.Effect<void, StorageError>
   readonly clear: () => Effect.Effect<void, StorageError>
+  readonly getSelectedMeasurementSystem: () => Effect.Effect<string, StorageError>
+  readonly setSelectedMeasurementSystem: (systemId: string) => Effect.Effect<void, StorageError>
 }
 
 export const StorageService = Context.GenericTag<StorageService>("@services/StorageService")
+
+const MEASUREMENT_SYSTEM_KEY = 'selectedMeasurementSystem'
+const DEFAULT_MEASUREMENT_SYSTEM = 'metric'
 
 const chromeStorageGet = (keys?: string[]): Effect.Effect<Record<string, any>, StorageError> =>
   Effect.tryPromise({
@@ -82,12 +87,24 @@ const chromeStorageClear = (): Effect.Effect<void, StorageError> =>
     })
   })
 
+const getSelectedMeasurementSystem = (): Effect.Effect<string, StorageError> =>
+  Effect.gen(function* () {
+    const data = yield* chromeStorageGet([MEASUREMENT_SYSTEM_KEY])
+    const result = data[MEASUREMENT_SYSTEM_KEY] || DEFAULT_MEASUREMENT_SYSTEM
+    return result
+  })
+
+const setSelectedMeasurementSystem = (systemId: string): Effect.Effect<void, StorageError> =>
+  chromeStorageSet({ [MEASUREMENT_SYSTEM_KEY]: systemId })
+
 export const StorageServiceLive = Layer.succeed(
   StorageService,
   StorageService.of({
     get: (keys) => chromeStorageGet(keys),
     set: (data) => chromeStorageSet(data),
     remove: (keys) => chromeStorageRemove(keys),
-    clear: () => chromeStorageClear()
+    clear: () => chromeStorageClear(),
+    getSelectedMeasurementSystem: () => getSelectedMeasurementSystem(),
+    setSelectedMeasurementSystem: (systemId) => setSelectedMeasurementSystem(systemId)
   })
 ) 

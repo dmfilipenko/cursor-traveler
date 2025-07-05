@@ -46,8 +46,18 @@ const isValidDistanceValue = (value: any): value is number => {
          value < 1000000 // 1km seems reasonable as max daily distance
 }
 
-const isValidStorageEntry = ([key, value]: [string, any]): boolean =>
-  isValidTimestampKey(key) && isValidDistanceValue(value)
+// Configuration keys that should never be cleaned up
+const PROTECTED_KEYS = ['selectedMeasurementSystem']
+
+const isValidStorageEntry = ([key, value]: [string, any]): boolean => {
+  // Never clean up protected configuration keys
+  if (PROTECTED_KEYS.includes(key)) {
+    return true
+  }
+  
+  // For distance data, validate timestamp key and distance value
+  return isValidTimestampKey(key) && isValidDistanceValue(value)
+}
 
 // Effect-based distance validation
 const validateDistance = (distance: unknown): Effect.Effect<number, MeasurementError> =>
@@ -72,15 +82,17 @@ const cleanStorage = (): Effect.Effect<void, never, StorageService> =>
     
     const keysToRemove = Array.filterMap(
       Object.entries(storageData),
-      ([key, value]) => 
-        isValidStorageEntry([key, value]) ? Option.none() : Option.some(key)
+      ([key, value]) => {
+        const isValid = isValidStorageEntry([key, value])
+        return isValid ? Option.none() : Option.some(key)
+      }
     )
     
     if (keysToRemove.length > 0) {
       yield* storageService.remove(keysToRemove).pipe(
         Effect.catchAll(() => Effect.succeed(void 0))
       )
-    }
+    } 
   })
 
 const processDistanceMessage = (distance: unknown): Effect.Effect<{ success: true }, StorageError | BadgeError | MeasurementError, StorageService | DateService | BadgeService | CalculationService | MeasurementService> =>

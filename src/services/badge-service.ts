@@ -3,6 +3,7 @@ import { BadgeError, StorageError, MeasurementError } from '../domain/errors'
 import { StorageService } from './storage-service'
 import { MeasurementService } from './measurement-service'
 import { CalculationService } from './calculation-service'
+import { getSystemById } from '../measurement-systems'
 
 export interface BadgeService {
   readonly setBadgeText: (text: string) => Effect.Effect<void, BadgeError>
@@ -37,10 +38,16 @@ const setBadgeText = (text: string): Effect.Effect<void, BadgeError> =>
 
 const getDisplayUnits = (
   total: number
-): Effect.Effect<string, MeasurementError, MeasurementService> =>
+): Effect.Effect<string, StorageError | MeasurementError, StorageService | MeasurementService> =>
   Effect.gen(function* () {
+    const storageService = yield* StorageService
     const measurementService = yield* MeasurementService
-    const measurement = yield* measurementService.convertFromMillimeters(total)
+    
+    // Get the selected measurement system from storage
+    const selectedSystemId = yield* storageService.getSelectedMeasurementSystem()
+    const selectedSystem = getSystemById(selectedSystemId)
+    
+    const measurement = yield* measurementService.convertFromMillimeters(total, selectedSystem)
     return measurement.unit.symbol
   })
 

@@ -27,7 +27,7 @@ const processMouseMovements = (): Effect.Effect<void, ChromeRuntimeError, never>
   Effect.gen(function* () {
     const mouseStream = MouseTrackingServiceLive.createStream()
     
-    const bufferedStream = Stream.groupedWithin(mouseStream, 100, "5 seconds").pipe(
+    const bufferedStream = Stream.groupedWithin(mouseStream, 50, "1 second").pipe(
       Stream.map((chunk: Chunk.Chunk<number>) => {
         const movements = Chunk.toReadonlyArray(chunk)
         return EffectArray.reduce(movements, 0, (sum: number, value: number) => sum + value)
