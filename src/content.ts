@@ -3,17 +3,22 @@ import { MouseTrackingServiceLive } from './services/mouse-tracking-service'
 import { ChromeMessage } from './domain/models'
 import { ChromeRuntimeError } from './domain/errors'
 
-// Direct Chrome messaging function
+// Direct Chrome messaging function with offline handling
 const sendMessage = <T = any>(message: ChromeMessage): Effect.Effect<T, ChromeRuntimeError> =>
   Effect.tryPromise({
     try: () => new Promise<T>((resolve, reject) => {
-      chrome.runtime.sendMessage(message, (response) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError)
-        } else {
-          resolve(response)
-        }
-      })
+      try {
+        chrome.runtime.sendMessage(message, (response) => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError)
+          } else {
+            resolve(response)
+          }
+        })
+      } catch (error) {
+        // Handle case when extension context is invalidated
+        reject(error)
+      }
     }),
     catch: (error) => new ChromeRuntimeError({
       message: "Failed to send message",
@@ -43,7 +48,13 @@ const processMouseMovements = (): Effect.Effect<void, ChromeRuntimeError, never>
           data: total
         }
         
-        yield* sendMessage(distanceMessage)
+        yield* sendMessage(distanceMessage).pipe(
+          Effect.catchAll((error) => {
+            // Log error but don't stop the stream - extension should continue tracking
+            console.debug('Message send failed (extension still functional):', error)
+            return Effect.succeed(void 0)
+          })
+        )
       })
     )
   })

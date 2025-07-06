@@ -5,7 +5,15 @@
 [Chrome extension](http://bit.ly/readmeGithub) which measure the distance your mouse travels.
 
 ### Why?
-Made for fun to learn RxJS
+Made for fun to learn RxJS (now migrated to Effect for better performance and type safety!)
+
+### Features
+- 🖱️ **Mouse Distance Tracking**: Measures total mouse movement distance
+- 📏 **Multiple Units**: Metric, Imperial, and Nautical measurement systems
+- 📱 **Offline First**: Works completely offline - no internet required
+- 🔒 **Privacy Focused**: All data stays on your device
+- ⚡ **Real-time Updates**: Fast updates every second
+- 🎯 **Lightweight**: Minimal resource usage
 
 
 ### Development

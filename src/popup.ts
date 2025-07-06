@@ -27,18 +27,28 @@ const MainLayer = Layer.mergeAll(
   BadgeServiceLive
 )
 
-// Analytics functions for GA4
+// Analytics functions for GA4 (with offline handling)
 const sendPageview = (): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
-    if (typeof window !== 'undefined' && window.analytics) {
-      window.analytics.trackPageView('popup')
+    try {
+      if (typeof window !== 'undefined' && window.analytics && navigator.onLine) {
+        window.analytics.trackPageView('popup')
+      }
+    } catch (error) {
+      // Silently fail for analytics - extension should work without it
+      console.debug('Analytics unavailable:', error)
     }
   })
 
 const trackPopupInteraction = (): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
-    if (typeof window !== 'undefined' && window.analytics) {
-      window.analytics.trackPopupOpen()
+    try {
+      if (typeof window !== 'undefined' && window.analytics && navigator.onLine) {
+        window.analytics.trackPopupOpen()
+      }
+    } catch (error) {
+      // Silently fail for analytics - extension should work without it
+      console.debug('Analytics unavailable:', error)
     }
   })
 
@@ -177,6 +187,24 @@ const setupStorageListener = (): Effect.Effect<void, never, never> =>
     })
   })
 
+// Setup offline indicator
+const setupOfflineIndicator = (): Effect.Effect<void, never, never> =>
+  Effect.sync(() => {
+    const updateOfflineStatus = () => {
+      const offlineIndicator = document.querySelector('.offline-indicator') as HTMLElement
+      if (offlineIndicator) {
+        offlineIndicator.style.display = navigator.onLine ? 'none' : 'block'
+      }
+    }
+    
+    // Initial check
+    updateOfflineStatus()
+    
+    // Listen for online/offline events
+    window.addEventListener('online', updateOfflineStatus)
+    window.addEventListener('offline', updateOfflineStatus)
+  })
+
 // Periodic refresh
 const setupPeriodicRefresh = (): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
@@ -194,6 +222,7 @@ const program = Effect.gen(function* () {
   yield* setupMeasurementSystemSelector()
   yield* renderPopup()
   yield* setupStorageListener()
+  yield* setupOfflineIndicator()
   yield* setupPeriodicRefresh()
 })
 

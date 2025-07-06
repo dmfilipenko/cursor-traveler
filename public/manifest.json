@@ -27,12 +27,11 @@
     "service_worker": "src/background.ts"
   },
   "host_permissions": [
-    "<all_urls>",
-    "https://www.google-analytics.com/*",
-    "https://www.googletagmanager.com/*"
+    "<all_urls>"
   ],
   "permissions": [
     "storage",
     "alarms"
-  ]
+  ],
+  "privacy_policy": "https://github.com/dmfilipenko/cursor-traveler/blob/main/PRIVACY.md"
 }
