@@ -1,5 +1,5 @@
 import { Big } from 'big.js'
-import { Data, Schema } from 'effect'
+import { Data  } from 'effect'
 
 export type MessageType = "distance" | "badge_update"
 

@@ -1,75 +1,143 @@
 # Privacy Policy for Cursor Traveler Extension
 
-**Last Updated**: July 2025
+**Last Updated**: January 2025  
+**Extension ID**: fpaofkicpfiiifjpmkcadjpedlohpgep  
+**Developer**: Dmytro Filipenko  
 
 ## Overview
 
-Cursor Traveler is a Chrome extension that tracks mouse movement distance on web pages. We are committed to protecting your privacy and being transparent about data collection practices.
+Cursor Traveler is a Chrome browser extension that tracks and measures mouse movement distances across all websites you visit. This privacy policy explains what data we collect, how we use it, and your rights regarding your data.
 
-## Data Collection
+## Data Collection and Usage
 
-### Mouse Movement Data
-- **What we collect**: Distance measurements of mouse movements in pixels
-- **How we collect**: Through content scripts that monitor mouse events on web pages
-- **Where it's stored**: Locally in your browser's Chrome storage (never sent to external servers)
-- **Purpose**: To calculate and display total mouse travel distance
+### 1. Mouse Movement Data (Essential Function)
+**What we collect:**
+- Mouse cursor coordinates (X, Y positions) on web pages
+- Calculated distances between mouse movements in pixels
+- Timestamps of when movements occurred
+- Daily aggregated distance totals
 
-### Analytics Data (Optional)
-- **What we collect**: Basic usage statistics (popup opens, measurement system changes)
-- **How we collect**: Through Google Analytics (only if analytics is enabled)
-- **Where it's stored**: Google Analytics servers (following Google's privacy policy)
-- **Purpose**: To improve the extension's performance and user experience
+**How we collect it:**
+- Content scripts monitor mouse movement events on ALL websites you visit
+- Distance calculations are performed locally in your browser
+- Data is automatically saved to Chrome's local storage
 
-## Data Usage
+**Purpose:**
+- To calculate and display total mouse travel distance
+- To provide daily/historical movement statistics
+- To enable measurement unit conversions (metric/imperial/nautical)
+
+**Legal basis:** Legitimate interest in providing the core functionality you installed the extension for
+
+### 2. User Preferences
+**What we collect:**
+- Selected measurement system (metric, imperial, nautical)
+- Extension settings and configurations
+
+**How we store it:**
+- Locally in Chrome storage on your device
+- Never transmitted to external servers
+
+**Purpose:**
+- To remember your preferred measurement units
+- To maintain consistent user experience
+
+### 3. Usage Analytics (Optional)
+**What we may collect:**
+- Extension popup open events
+- Measurement system changes
+- Basic usage statistics
+
+**How we collect it:**
+- Only if you grant optional analytics permissions
+- Through Google Analytics (if enabled)
+
+**Purpose:**
+- To improve extension performance and user experience
+- To understand feature usage patterns
+
+## Data Storage and Security
 
 ### Local Storage
-- All mouse movement data is stored locally in your browser
-- Data is aggregated by day and stored as distance measurements
-- No personal information is collected or stored
-- Data never leaves your device for core functionality
+- **Location**: All mouse movement data stays on your device in Chrome's secure local storage
+- **Security**: Data is protected by Chrome's built-in security measures
+- **Access**: Only this extension can access its stored data
+- **Persistence**: Data remains until you manually clear it or uninstall the extension
 
-### Third-Party Services
-- **Google Analytics**: Optional usage analytics (can be disabled)
-- **Chrome Web Store**: Standard Chrome extension permissions
+### External Services
+- **Google Analytics**: Only if you explicitly grant optional permissions
+- **No other external services**: Core functionality requires no internet connection
 
-## Data Retention
+## Data Sharing and Disclosure
 
-- **Local Data**: Stored indefinitely in your browser until manually cleared
-- **Analytics Data**: Subject to Google Analytics retention policies
-- **Cleanup**: Invalid or corrupted data is automatically cleaned from local storage
+**We do not:**
+- Sell your data to third parties
+- Share your mouse movement data with anyone
+- Transmit your data to external servers for core functionality
+- Use your data for advertising or marketing
 
-## Data Security
+**We may share anonymized analytics data with:**
+- Google Analytics (only if you grant optional permissions)
+- No other third parties
 
-- All data is stored locally in Chrome's secure storage system
-- No data transmission to external servers for core functionality
-- Content scripts operate in isolated contexts for security
+## Your Rights and Choices
 
-## Your Rights
+### Access and Control
+- **View your data**: Open the extension popup to see your current statistics
+- **Clear your data**: Use the extension's clear function or Chrome's extension settings
+- **Disable tracking**: Uninstall the extension to stop all data collection
+- **Opt out of analytics**: Deny optional permissions when prompted
 
-You have the right to:
-- **Access**: View your data through the extension's popup interface
-- **Delete**: Clear all stored data using the extension's clear function
-- **Control**: Disable analytics by not granting optional permissions
+### Data Deletion
+- **Manual deletion**: Use the extension's clear storage function
+- **Automatic deletion**: Uninstalling the extension removes all stored data
+- **No recovery**: Once deleted, data cannot be recovered
 
-## Data Sharing
+## Technical Details
 
-- We do not sell, trade, or share your personal data with third parties
-- Analytics data is only shared with Google Analytics under their privacy terms
-- All mouse movement data remains local to your browser
+### Permissions Explained
+- **"storage"**: Required to save your mouse movement data and preferences locally
+- **"<all_urls>"**: Required to track mouse movements on all websites
+- **"alarms"**: Required for periodic data cleanup and maintenance
+- **Optional analytics permissions**: Only used if you explicitly grant them
 
-## Contact
+### Data Minimization
+- We only collect data necessary for the extension's core functionality
+- Mouse coordinates are immediately converted to distances and original coordinates are discarded
+- Data is aggregated by day to minimize storage requirements
 
-For privacy concerns or questions about this policy, please contact us through:
-- GitHub Issues: https://github.com/dmfilipenko/cursor-traveler/issues
-- Email: [Your contact email]
+## Compliance and Standards
+
+This extension and privacy policy comply with:
+- Chrome Web Store Developer Program Policies
+- General Data Protection Regulation (GDPR) principles
+- California Consumer Privacy Act (CCPA) requirements
+- Chrome Extension Manifest V3 security requirements
 
 ## Changes to This Policy
 
-We may update this privacy policy from time to time. Any changes will be posted on this page with an updated revision date.
+We may update this privacy policy to reflect changes in our data practices or legal requirements. When we make changes:
+- We will update the "Last Updated" date
+- For significant changes, we will provide notice through the extension or Chrome Web Store
+- Your continued use of the extension constitutes acceptance of the updated policy
 
-## Compliance
+## Contact Information
 
-This extension complies with:
-- Chrome Web Store privacy requirements
-- General data protection principles
-- Chrome extension security policies 
+For questions, concerns, or requests regarding this privacy policy or your data:
+
+**Primary Contact:**
+- GitHub Issues: https://github.com/dmfilipenko/cursor-traveler/issues
+- Email: dmfilipenko@gmail.com
+
+**Data Protection Requests:**
+- For GDPR-related requests: dmfilipenko@gmail.com
+- For CCPA-related requests: dmfilipenko@gmail.com
+
+**Response Time:**
+- We aim to respond to privacy-related inquiries within 30 days
+- Urgent security concerns will be addressed within 72 hours
+
+## Effective Date
+
+This privacy policy is effective as of January 2025 and applies to all users of the Cursor Traveler extension.
+
