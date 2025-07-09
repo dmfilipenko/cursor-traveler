@@ -1,13 +1,20 @@
 {
   "name": "cursor-traveler",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Cursor Traveler: Chrome Extension. Count how many moves make your mouse",
+  "type": "module",
   "scripts": {
-    "watch": "webpack --config webpack/webpack.dev.js --watch",
-    "build": "webpack --config webpack/webpack.prod.js",
-    "zip": "zip -r -X pedometer.zip dist",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "zip": "zip -r -X cursor-traveler.zip dist",
     "build:zip": "npm run build && npm run zip",
-    "test:unit": "jest -c jest.config.unit.js"
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix"
   },
   "author": "Dmytro Filipenko",
   "repository": {
@@ -15,28 +22,27 @@
     "url": "https://github.com/dmfilipenko/cursor-traveler"
   },
   "dependencies": {
-    "ramda": "^0.25.0",
-    "rxjs": "6.3.1"
+    "@effect/platform": "^0.87.1",
+    "@effect/platform-browser": "^0.67.1",
+    "big.js": "^7.0.1",
+    "effect": "^3.16.10"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.1.0",
-    "@types/chrome": "0.0.75",
-    "@types/jest": "^23.3.2",
-    "@types/node": "^10.11.3",
-    "@types/ramda": "^0.25.38",
-    "@types/rx": "^4.1.1",
-    "clean-webpack-plugin": "^0.1.19",
-    "copy-webpack-plugin": "^4.5.2",
-    "css-loader": "^1.0.0",
-    "jest": "^23.6.0",
-    "style-loader": "^0.23.0",
-    "ts-jest": "23.1.4",
-    "ts-loader": "~5.0.0",
-    "typescript": "^3.1.1",
-    "uglifyjs-webpack-plugin": "^2.0.1",
-    "webpack": "^4.17.3",
-    "webpack-bundle-analyzer": "^3.0.2",
-    "webpack-cli": "~3.1.0",
-    "webpack-merge": "^4.1.4"
+    "@crxjs/vite-plugin": "^2.0.0",
+    "@types/big.js": "^6.2.2",
+    "@types/chrome": "^0.0.270",
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.2",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.1.1",
+    "terser": "^5.43.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vitest": "^1.1.0"
   }
 }

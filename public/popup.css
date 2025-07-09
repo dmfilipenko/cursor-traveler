@@ -1,0 +1,122 @@
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Nunito Regular'), local('Nunito-Regular'), url('fonts/Nunito-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  src: local('Nunito Bold'), local('Nunito-Bold'), url('fonts/Nunito-Bold.ttf') format('truetype');
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.wrapper {
+  padding: 20px 50px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  min-width: 200px;
+}
+
+.title {
+  color: #7A7A7A;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 400;
+}
+
+.metric-selector {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 0 25px 0;
+  position: relative;
+}
+
+.toggle-option {
+  position: relative;
+}
+
+.toggle-option:not(:last-child)::after {
+  content: '•';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ddd;
+  font-size: 8px;
+}
+
+.toggle-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+
+.toggle-option label {
+  display: block;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+  position: relative;
+  border-radius: 4px;
+  font-weight: 400;
+}
+
+.toggle-option label::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: #007AFF;
+  transition: width 0.2s ease;
+  border-radius: 1px;
+}
+
+.toggle-option input[type="radio"]:checked + label {
+  color: #007AFF;
+  font-weight: 600;
+  background: rgba(0, 122, 255, 0.08);
+}
+
+.toggle-option input[type="radio"]:checked + label::after {
+  width: calc(100% - 16px);
+}
+
+.total {
+  font-size: 50px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  line-height: 1.2;
+  font-weight: 600;
+  text-align: center;
+  position: relative;
+}
+
+.total span {
+  font-weight: 400;
+  font-size: 0.4em;
+}
+
+.unit {
+  font-size: 14px;
+  margin-top: -8px;
+  text-align: center;
+  margin-bottom: 25px;
+  font-weight: 400;
+}
