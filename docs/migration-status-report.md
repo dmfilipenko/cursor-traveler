@@ -110,7 +110,7 @@
 
 ### Comprehensive Testing (100% Complete)
 - ✅ **37 Total Tests**: Complete coverage of universal converter functionality
-- ✅ **AstronomicalSystem Tests**: Including fractional AU and light-year values
+
 - ✅ **DPI Detection Tests**: CSS measurement, fallbacks, error handling
 - ✅ **Unit Selection Tests**: Threshold behavior validation
 - ✅ **Precision & Formatting**: Astronomical decimal preservation
