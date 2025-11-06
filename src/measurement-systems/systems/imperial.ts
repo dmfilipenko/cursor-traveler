@@ -31,8 +31,8 @@ export const ImperialSystem: MeasurementSystem = {
       name: 'mile',
       symbol: 'mi',
       factor: new Big('1609344'),      // 1 mile = 1,609,344 mm
-      threshold: new Big('804672'),    // Use miles for >= 804,672mm (0.5 miles)
-      precision: 2
+      threshold: new Big('160934'),    // Use miles for >= 160,934mm (0.1 miles)
+      precision: 3
     }
   ]
 } as const 

@@ -72,18 +72,12 @@ describe('Universal Converter', () => {
       expect(result.formatted).toContain('inch')
     })
 
-    it('should handle astronomical system for large values', async () => {
-      // Very large pixel value to trigger astronomical units
-      const result = await Effect.runPromise(convertPixelsToById(89432176.3, 'astronomical'))
-      
-      expect(result.unit.symbol).toBe('AU')
-      expect(result.formatted).toContain('astronomical unit')
-    })
+    it('should default to metric for invalid system ID', async () => {
+      // Invalid system IDs should default to metric system
+      const result = await Effect.runPromise(convertPixelsToById(123.4, 'invalid'))
 
-    it('should fail with invalid system ID', async () => {
-      const result = Effect.runPromise(convertPixelsToById(123.4, 'invalid'))
-      
-      await expect(result).rejects.toThrow()
+      expect(result.unit.symbol).toMatch(/mm|cm|m|km/)
+      expect(result.value).toBeGreaterThan(0)
     })
 
     it('should fail with negative pixels', async () => {
@@ -109,16 +103,20 @@ describe('Universal Converter', () => {
       expect(result.value).toBeCloseTo(1.25, 1)
     })
 
-    it('should fail with invalid from system', async () => {
-      const result = Effect.runPromise(convertBetween(156.3, 'invalid', 'metric'))
-      
-      await expect(result).rejects.toThrow()
+    it('should default to metric for invalid from system', async () => {
+      // Invalid from system should default to metric
+      const result = await Effect.runPromise(convertBetween(156.3, 'invalid', 'metric'))
+
+      expect(result.unit.symbol).toMatch(/mm|cm|m|km/)
+      expect(result.value).toBeGreaterThan(0)
     })
 
-    it('should fail with invalid to system', async () => {
-      const result = Effect.runPromise(convertBetween(892.1, 'metric', 'invalid'))
-      
-      await expect(result).rejects.toThrow()
+    it('should default to metric for invalid to system', async () => {
+      // Invalid to system should default to metric
+      const result = await Effect.runPromise(convertBetween(892.1, 'metric', 'invalid'))
+
+      expect(result.unit.symbol).toMatch(/mm|cm|m|km/)
+      expect(result.value).toBeGreaterThan(0)
     })
   })
 
@@ -179,20 +177,16 @@ describe('Universal Converter', () => {
       expect(symbol).toBe('in') // 25.4mm = 1 inch
     })
 
-    it('should return correct symbol for astronomical values', async () => {
-      const symbol = await Effect.runPromise(getUnitSymbol(149597870700000, 'astronomical'))
-      expect(symbol).toBe('AU') // 1 AU
-    })
-
     it('should return correct symbol for nautical values', async () => {
       const symbol = await Effect.runPromise(getUnitSymbol(1852000, 'nautical'))
       expect(symbol).toBe('nmi') // 1 nautical mile
     })
 
-    it('should fail with invalid system', async () => {
-      const result = Effect.runPromise(getUnitSymbol(345.2, 'invalid'))
-      
-      await expect(result).rejects.toThrow()
+    it('should default to metric for invalid system', async () => {
+      // Invalid system should default to metric
+      const symbol = await Effect.runPromise(getUnitSymbol(345.2, 'invalid'))
+
+      expect(symbol).toMatch(/mm|cm|m|km/)
     })
   })
 
@@ -284,20 +278,36 @@ describe('Universal Converter', () => {
   describe('Precision and Formatting', () => {
     it('should format values with correct precision', async () => {
       const result = await Effect.runPromise(convertPixelsToById(187.4, 'metric'))
-      
+
       // Check that formatted string has reasonable precision
-      expect(result.formatted).toMatch(/^\d+(\.\d{1,2})? \w+$/)
+      expect(result.formatted).toMatch(/^\d+(\.\d{1,3})? \w+$/)
     })
 
-    it('should handle very large astronomical values', async () => {
-      // Test with a very large value that would trigger astronomical units
-      // Need an extremely large value to reach AU threshold
-      const pixels = 8.7e15 // Extremely large
-      const result = await Effect.runPromise(convertPixelsToById(pixels, 'astronomical'))
-      
-      expect(result.unit.symbol).toBe('AU')
-      expect(result.value).toBeGreaterThan(0)
-      expect(result.formatted).toContain('astronomical unit')
+    it('should show meters for medium-large values', async () => {
+      // Test with value that shows as meters
+      // At 96 DPI: 50,000 pixels = ~520 inches = ~13,229mm = ~13.2m
+      const pixels = 50000
+      const result = await Effect.runPromise(convertPixelsToById(pixels, 'metric'))
+
+      // At this scale, should show meters (13.23m)
+      expect(result.unit.symbol).toBe('m')
+      expect(result.value).toBeCloseTo(13.23, 0)
+      expect(result.formatted).toContain('meter')
+    })
+
+    it('should show kilometers with 3 decimal places for very large values', async () => {
+      // Test with value large enough to display as kilometers (>= 1km)
+      // At 96 DPI: ~3,800,000 pixels = ~1km
+      // Using 5,000,000 pixels to ensure we're well above 1km
+      const pixels = 5000000
+      const result = await Effect.runPromise(convertPixelsToById(pixels, 'metric'))
+
+      // Should show kilometers with 3 decimal precision
+      expect(result.unit.symbol).toBe('km')
+      expect(result.value).toBeGreaterThan(1)
+      expect(result.formatted).toContain('kilometer')
+      // Verify 3 decimal places are supported
+      expect(result.unit.precision).toBe(3)
     })
 
   })

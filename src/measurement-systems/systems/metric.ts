@@ -31,8 +31,8 @@ export const MetricSystem: MeasurementSystem = {
       name: 'kilometer',
       symbol: 'km',
       factor: new Big('1000000'),     // 1 km = 1,000,000 mm
-      threshold: new Big('100000'),   // Use km for >= 100,000mm (100m)
-      precision: 2
+      threshold: new Big('10000'),    // Use km for >= 10,000mm (10m)
+      precision: 3
     }
   ]
 } as const 
