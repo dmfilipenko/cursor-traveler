@@ -1,10 +1,11 @@
-import { Effect, Layer } from 'effect'
+import { Effect, Layer, Option } from 'effect'
 import { StorageService, StorageServiceLive } from './services/storage-service'
 import { CalculationService, CalculationServiceLive } from './services/calculation-service'
 import { MeasurementService, MeasurementServiceLive } from './services/measurement-service'
 import { BadgeService, BadgeServiceLive } from './services/badge-service'
 import { FormattedMeasurement } from './domain/types'
 import { StorageError, MeasurementError, RenderError, BadgeError } from './domain/errors'
+import { getRestrictionCopy, getRestrictedReason, RestrictedReason } from './domain/restricted-pages'
 import { getSystemById } from './measurement-systems'
 
 // Type declaration for analytics functions
@@ -83,6 +84,38 @@ const render = (measurement: FormattedMeasurement): Effect.Effect<void, RenderEr
       element: 'popup',
       cause: error
     })
+  })
+
+const detectPageRestriction = (): Effect.Effect<Option.Option<RestrictedReason>> =>
+  Effect.async<Option.Option<RestrictedReason>>((resume) => {
+    if (!chrome.tabs || !chrome.tabs.query) {
+      resume(Effect.succeed(Option.none()))
+      return
+    }
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTab = tabs[0]
+      resume(Effect.succeed(getRestrictedReason(activeTab?.url)))
+    })
+  })
+
+const renderRestrictionMessage = (reason: RestrictedReason): Effect.Effect<void> =>
+  Effect.sync(() => {
+    const wrapper = document.querySelector<HTMLDivElement>('.wrapper')
+    if (!wrapper) {
+      return
+    }
+
+    const copy = getRestrictionCopy(reason)
+
+    wrapper.innerHTML = `
+      <div class="unsupported">
+        <div class="unsupported-icon" role="img" aria-label="${copy.iconLabel}">${copy.icon}</div>
+        <div class="unsupported-title">${copy.title}</div>
+        <p class="unsupported-description">${copy.description}</p>
+        <p class="unsupported-hint">${copy.hint}</p>
+      </div>
+    `
   })
 
 // Main popup render logic with selected system
@@ -219,6 +252,14 @@ const setupPeriodicRefresh = (): Effect.Effect<void, never, never> =>
 const program = Effect.gen(function* () {
   yield* sendPageview()
   yield* trackPopupInteraction()
+
+  const restriction = yield* detectPageRestriction()
+
+  if (Option.isSome(restriction)) {
+    yield* renderRestrictionMessage(restriction.value)
+    return
+  }
+
   yield* setupMeasurementSystemSelector()
   yield* renderPopup()
   yield* setupStorageListener()

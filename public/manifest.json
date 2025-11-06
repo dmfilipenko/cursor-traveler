@@ -32,7 +32,8 @@
   ],
   "permissions": [
     "storage",
-    "alarms"
+    "alarms",
+    "tabs"
   ],
   "privacy_policy": "https://github.com/dmfilipenko/cursor-traveler/blob/main/PRIVACY.md"
 }
