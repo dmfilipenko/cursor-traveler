@@ -283,15 +283,31 @@ describe('Universal Converter', () => {
       expect(result.formatted).toMatch(/^\d+(\.\d{1,3})? \w+$/)
     })
 
-    it('should handle very large values with appropriate units', async () => {
-      // Test with a very large value - should show meters or kilometers depending on size
-      const pixels = 50000 // Large pixel value
+    it('should show meters for medium-large values', async () => {
+      // Test with value that shows as meters
+      // At 96 DPI: 50,000 pixels = ~520 inches = ~13,229mm = ~13.2m
+      const pixels = 50000
       const result = await Effect.runPromise(convertPixelsToById(pixels, 'metric'))
 
-      // Should use an appropriate large unit (m or km)
-      expect(result.unit.symbol).toMatch(/m|km/)
-      expect(result.value).toBeGreaterThan(0)
-      expect(result.formatted).toMatch(/meter|kilometer/)
+      // At this scale, should show meters (13.23m)
+      expect(result.unit.symbol).toBe('m')
+      expect(result.value).toBeCloseTo(13.23, 0)
+      expect(result.formatted).toContain('meter')
+    })
+
+    it('should show kilometers with 3 decimal places for very large values', async () => {
+      // Test with value large enough to display as kilometers (>= 1km)
+      // At 96 DPI: ~3,800,000 pixels = ~1km
+      // Using 5,000,000 pixels to ensure we're well above 1km
+      const pixels = 5000000
+      const result = await Effect.runPromise(convertPixelsToById(pixels, 'metric'))
+
+      // Should show kilometers with 3 decimal precision
+      expect(result.unit.symbol).toBe('km')
+      expect(result.value).toBeGreaterThan(1)
+      expect(result.formatted).toContain('kilometer')
+      // Verify 3 decimal places are supported
+      expect(result.unit.precision).toBe(3)
     })
 
   })
