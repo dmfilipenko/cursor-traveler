@@ -7,6 +7,7 @@ import { CalculationService, CalculationServiceLive } from './services/calculati
 import { MeasurementService, MeasurementServiceLive } from './services/measurement-service'
 import { ChromeMessage } from './domain/models'
 import { StorageError, BadgeError, MeasurementError } from './domain/errors'
+import { isRestrictedUrl } from './domain/restricted-pages'
 
 // Create main service layer
 const MainLayer = Layer.mergeAll(
@@ -24,6 +25,29 @@ const setupKeepalive = (): Effect.Effect<void, never, never> =>
     chrome.alarms.onAlarm.addListener((alarm) => {
       if (alarm.name === 'keepalive') {
         // Keepalive triggered
+      }
+    })
+  })
+
+let postInstallReloadRegistered = false
+
+const setupPostInstallReload = (): Effect.Effect<void, never, never> =>
+  Effect.sync(() => {
+    if (postInstallReloadRegistered) {
+      return
+    }
+
+    postInstallReloadRegistered = true
+
+    chrome.runtime.onInstalled.addListener((details) => {
+      if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
+        chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] }, (tabs) => {
+          tabs.forEach((tab) => {
+            if (typeof tab.id === 'number' && !isRestrictedUrl(tab.url)) {
+              chrome.tabs.reload(tab.id)
+            }
+          })
+        })
       }
     })
   })
@@ -132,6 +156,7 @@ const initialize = (): Effect.Effect<void, never, StorageService | MessagingServ
     const badgeService = yield* BadgeService
     
     yield* setupKeepalive()
+    yield* setupPostInstallReload()
     yield* cleanStorage()
     
     // Setup message listener with provided MainLayer

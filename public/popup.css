@@ -120,3 +120,34 @@ html, body {
   margin-bottom: 25px;
   font-weight: 400;
 }
+
+.unsupported {
+  text-align: center;
+  padding: 10px 0;
+  max-width: 260px;
+}
+
+.unsupported-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.unsupported-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.unsupported-description {
+  font-size: 13px;
+  color: #4a4a4a;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.unsupported-hint {
+  font-size: 12px;
+  color: #7a7a7a;
+  margin: 0;
+}
