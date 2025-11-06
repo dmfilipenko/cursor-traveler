@@ -3,7 +3,7 @@
 
   "name": "Cursor Traveler: mouse move counter",
   "description": "Count how many moves make your mouse",
-  "version": "3.0.0",
+  "version": "3.1.0",
 
   "icons": {
     "16": "icons/16.png",

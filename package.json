@@ -1,6 +1,6 @@
 {
   "name": "cursor-traveler",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Cursor Traveler: Chrome Extension. Count how many moves make your mouse",
   "type": "module",
   "scripts": {
