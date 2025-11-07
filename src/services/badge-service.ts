@@ -23,7 +23,6 @@ const setBadgeText = (text: string): Effect.Effect<void, BadgeError> =>
     try: () => {
       if (chrome?.action?.setBadgeText) {
         chrome.action.setBadgeText({ text })
-        console.log('🏷️ Badge: Set to:', text)
       } else {
         throw new Error('chrome.action.setBadgeText not available')
       }
@@ -34,7 +33,9 @@ const setBadgeText = (text: string): Effect.Effect<void, BadgeError> =>
         value: text,
         cause: error,
       }),
-  })
+  }).pipe(
+    Effect.tap(() => Effect.log(`🏷️ Badge: Set to: ${text}`))
+  )
 
 const getDisplayUnits = (
   total: number

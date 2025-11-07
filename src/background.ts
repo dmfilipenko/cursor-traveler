@@ -19,11 +19,37 @@ const MainLayer = Layer.mergeAll(
   MeasurementServiceLive
 )
 
-const setupKeepalive = (): Effect.Effect<void, never, never> =>
+// Constants for keepalive configuration
+const KEEPALIVE_ALARM_NAME = 'keepalive' as const
+const KEEPALIVE_INTERVAL_MINUTES = 0.5 as const
+
+// Constants for tab reload configuration
+const TAB_URL_PATTERNS = ['http://*/*', 'https://*/*'] as const
+const HEALTH_CHECK_TIMEOUT_MS = 100 as const
+const HEALTH_CHECK_MESSAGE_TYPE = 'ping' as const
+
+// Priority weights for smart reloading
+const PRIORITY_WEIGHTS = {
+  ACTIVE_TAB: 1000,
+  RECENT_ONE_HOUR: 500,
+  RECENT_ONE_DAY: 100,
+  LOADED_TAB: 50, // Tab loaded in memory (not discarded)
+  PINNED_TAB: 25,
+} as const
+
+// Time thresholds in hours
+const TIME_THRESHOLDS = {
+  ONE_HOUR: 1,
+  ONE_DAY: 24,
+} as const
+
+const MILLISECONDS_PER_HOUR = 3600000 as const // 1000 * 60 * 60
+
+const setupKeepalive = () =>
   Effect.sync(() => {
-    chrome.alarms.create('keepalive', { periodInMinutes: 0.5 })
+    chrome.alarms.create(KEEPALIVE_ALARM_NAME, { periodInMinutes: KEEPALIVE_INTERVAL_MINUTES })
     chrome.alarms.onAlarm.addListener((alarm) => {
-      if (alarm.name === 'keepalive') {
+      if (alarm.name === KEEPALIVE_ALARM_NAME) {
         // Keepalive triggered
       }
     })
@@ -31,7 +57,132 @@ const setupKeepalive = (): Effect.Effect<void, never, never> =>
 
 let postInstallReloadRegistered = false
 
-const setupPostInstallReload = (): Effect.Effect<void, never, never> =>
+// Send message to tab and handle response
+const sendMessageToTab = (tabId: number, message: { type: string }) =>
+  Effect.tryPromise({
+    try: () => new Promise<{ loaded: boolean } | null>((resolve, reject) => {
+      chrome.tabs.sendMessage(tabId, message, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError)
+        } else {
+          resolve(response || null)
+        }
+      })
+    }),
+    catch: () => null as { loaded: boolean } | null
+  })
+
+// Check if content script is already loaded in a tab
+const checkContentScriptLoaded = (tabId: number) =>
+  Effect.race(
+    sendMessageToTab(tabId, { type: HEALTH_CHECK_MESSAGE_TYPE }),
+    Effect.sleep(HEALTH_CHECK_TIMEOUT_MS).pipe(Effect.as(null))
+  ).pipe(
+    Effect.map((response) => response?.loaded === true),
+    Effect.catchAll(() => Effect.succeed(false))
+  )
+
+// Determine reload priority: higher = more important
+const getTabPriority = (tab: chrome.tabs.Tab): number => {
+  let priority = 0
+
+  // Highest priority: active tab in current window
+  if (tab.active) {
+    priority += PRIORITY_WEIGHTS.ACTIVE_TAB
+  }
+
+  // High priority: recently accessed tabs
+  if (tab.lastAccessed) {
+    const hoursSinceAccess = (Date.now() - tab.lastAccessed) / MILLISECONDS_PER_HOUR
+    if (hoursSinceAccess < TIME_THRESHOLDS.ONE_HOUR) {
+      priority += PRIORITY_WEIGHTS.RECENT_ONE_HOUR
+    } else if (hoursSinceAccess < TIME_THRESHOLDS.ONE_DAY) {
+      priority += PRIORITY_WEIGHTS.RECENT_ONE_DAY
+    }
+  }
+
+  // Medium priority: tabs that are currently loaded (not discarded)
+  if (tab.discarded !== true) {
+    priority += PRIORITY_WEIGHTS.LOADED_TAB
+  }
+
+  // Lower priority: pinned tabs (they're likely to stay open)
+  if (tab.pinned) {
+    priority += PRIORITY_WEIGHTS.PINNED_TAB
+  }
+
+  return priority
+}
+
+// Query all tabs that can have content scripts
+const queryReloadableTabs = () =>
+  Effect.tryPromise({
+    try: () => chrome.tabs.query({ url: [...TAB_URL_PATTERNS] }),
+    catch: () => [] as chrome.tabs.Tab[]
+  }).pipe(
+    Effect.catchAll(() => Effect.succeed([] as chrome.tabs.Tab[]))
+  )
+
+// Check if a tab should be considered for reloading
+const isValidTab = (tab: chrome.tabs.Tab): boolean =>
+  typeof tab.id === 'number' && !isRestrictedUrl(tab.url)
+
+// Create tab with priority information
+const createTabWithPriority = (tab: chrome.tabs.Tab) =>
+  Effect.gen(function* () {
+    const priority = getTabPriority(tab)
+    const isLoaded = yield* checkContentScriptLoaded(tab.id!)
+
+    return {
+      tab,
+      priority,
+      needsReload: !isLoaded
+    }
+  })
+
+// Reload a single tab with logging
+const reloadTab = (tabId: number, priority: number, url?: string) =>
+  Effect.sync(() => chrome.tabs.reload(tabId)).pipe(
+    Effect.tap(() => Effect.log(`[Smart Reload] Reloading tab ${tabId} (priority: ${priority}): ${url || 'unknown'}`))
+  )
+
+// Smart reload: only reload tabs that need it, prioritizing active/recent tabs
+const smartReloadTabs = () =>
+  Effect.gen(function* () {
+    // Query all HTTP/HTTPS tabs
+    const tabs = yield* queryReloadableTabs()
+
+    // Filter valid tabs and check which need reloading
+    const validTabs = Array.filter(tabs, isValidTab)
+    const tabsToCheck = yield* Effect.all(
+      Array.map(validTabs, createTabWithPriority),
+      { concurrency: 'unbounded' }
+    )
+
+    // Filter to only tabs that need reloading and sort by priority (highest first)
+    const tabsToReload = Array.filter(tabsToCheck, (t) => t.needsReload)
+      .sort((a, b) => b.priority - a.priority)
+
+    // Reload tabs in priority order
+    yield* Effect.all(
+      Array.map(tabsToReload, ({ tab, priority }) =>
+        reloadTab(tab.id!, priority, tab.url)
+      ),
+      { concurrency: 'unbounded' }
+    )
+
+    return { tabsToReload: tabsToReload.length, totalTabs: tabs.length }
+  }).pipe(
+    Effect.tap(({ tabsToReload, totalTabs }) =>
+      tabsToReload === 0
+        ? Effect.log('[Smart Reload] No tabs needed reloading - all content scripts already loaded!')
+        : Effect.log(`[Smart Reload] Reloaded ${tabsToReload} of ${totalTabs} tabs`)
+    ),
+    Effect.tapError((error) => Effect.logError('[Smart Reload] Error during smart reload:', error)),
+    Effect.catchAll(() => Effect.succeed(void 0))
+  )
+
+const setupPostInstallReload = () =>
   Effect.sync(() => {
     if (postInstallReloadRegistered) {
       return
@@ -40,14 +191,17 @@ const setupPostInstallReload = (): Effect.Effect<void, never, never> =>
     postInstallReloadRegistered = true
 
     chrome.runtime.onInstalled.addListener((details) => {
-      if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
-        chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] }, (tabs) => {
-          tabs.forEach((tab) => {
-            if (typeof tab.id === 'number' && !isRestrictedUrl(tab.url)) {
-              chrome.tabs.reload(tab.id)
-            }
-          })
-        })
+      // Handle both INSTALL and UPDATE events
+      if (details.reason === chrome.runtime.OnInstalledReason.INSTALL ||
+          details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
+
+        // Use smart reload with Effect runtime and logging
+        Effect.runFork(
+          Effect.succeed(details.reason).pipe(
+            Effect.tap((reason) => Effect.log(`[Smart Reload] Extension ${reason} detected, performing smart reload...`)),
+            Effect.flatMap(() => smartReloadTabs())
+          )
+        )
       }
     })
   })
@@ -182,7 +336,7 @@ const initialize = (): Effect.Effect<void, never, StorageService | MessagingServ
   })
 
 // Main execution
-const main = (): Effect.Effect<void, never, never> =>
+const main = () =>
   Effect.gen(function* () {
     yield* initialize().pipe(
       Effect.provide(MainLayer),
