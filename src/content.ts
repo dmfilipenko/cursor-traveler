@@ -12,7 +12,7 @@ const HEALTH_CHECK_MESSAGE_TYPE = 'ping' as const
 const HEALTH_CHECK_RESPONSE = { status: 'ok', loaded: true } as const
 
 // Direct Chrome messaging function with offline handling
-const sendMessage = <T = any>(message: ChromeMessage): Effect.Effect<T, ChromeRuntimeError> =>
+const sendMessage = <T = any>(message: ChromeMessage) =>
   Effect.tryPromise({
     try: () => new Promise<T>((resolve, reject) => {
       try {
@@ -36,7 +36,7 @@ const sendMessage = <T = any>(message: ChromeMessage): Effect.Effect<T, ChromeRu
   })
 
 // Process mouse movements and send to background
-const processMouseMovements = (): Effect.Effect<void, ChromeRuntimeError, never> =>
+const processMouseMovements = () =>
   Effect.gen(function* () {
     const mouseStream = MouseTrackingServiceLive.createStream()
 

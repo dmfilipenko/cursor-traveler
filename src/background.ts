@@ -43,9 +43,9 @@ const TIME_THRESHOLDS = {
   ONE_DAY: 24,
 } as const
 
-const MILLISECONDS_PER_HOUR = 1000 * 60 * 60 as const
+const MILLISECONDS_PER_HOUR = 3600000 as const // 1000 * 60 * 60
 
-const setupKeepalive = (): Effect.Effect<void, never, never> =>
+const setupKeepalive = () =>
   Effect.sync(() => {
     chrome.alarms.create(KEEPALIVE_ALARM_NAME, { periodInMinutes: KEEPALIVE_INTERVAL_MINUTES })
     chrome.alarms.onAlarm.addListener((alarm) => {
@@ -57,16 +57,9 @@ const setupKeepalive = (): Effect.Effect<void, never, never> =>
 
 let postInstallReloadRegistered = false
 
-// Tab priority for smart reloading
-interface TabWithPriority {
-  tab: chrome.tabs.Tab
-  priority: number
-  needsReload: boolean
-}
-
 // Check if content script is already loaded in a tab
-const checkContentScriptLoaded = (tabId: number): Effect.Effect<boolean, never, never> =>
-  Effect.async<boolean, never, never>((resume) => {
+const checkContentScriptLoaded = (tabId: number) =>
+  Effect.async<boolean>((resume) => {
     let responded = false
 
     const respond = (value: boolean) => {
@@ -125,7 +118,7 @@ const getTabPriority = (tab: chrome.tabs.Tab): number => {
 }
 
 // Query all tabs that can have content scripts
-const queryReloadableTabs = (): Effect.Effect<chrome.tabs.Tab[], never, never> =>
+const queryReloadableTabs = () =>
   Effect.tryPromise({
     try: () => chrome.tabs.query({ url: [...TAB_URL_PATTERNS] }),
     catch: () => [] as chrome.tabs.Tab[]
@@ -138,7 +131,7 @@ const isValidTab = (tab: chrome.tabs.Tab): boolean =>
   typeof tab.id === 'number' && !isRestrictedUrl(tab.url)
 
 // Create tab with priority information
-const createTabWithPriority = (tab: chrome.tabs.Tab): Effect.Effect<TabWithPriority, never, never> =>
+const createTabWithPriority = (tab: chrome.tabs.Tab) =>
   Effect.gen(function* () {
     const priority = getTabPriority(tab)
     const isLoaded = yield* checkContentScriptLoaded(tab.id!)
@@ -151,14 +144,14 @@ const createTabWithPriority = (tab: chrome.tabs.Tab): Effect.Effect<TabWithPrior
   })
 
 // Reload a single tab with logging
-const reloadTab = (tabId: number, priority: number, url?: string): Effect.Effect<void, never, never> =>
+const reloadTab = (tabId: number, priority: number, url?: string) =>
   Effect.sync(() => {
     console.log(`[Smart Reload] Reloading tab ${tabId} (priority: ${priority}): ${url || 'unknown'}`)
     chrome.tabs.reload(tabId)
   })
 
 // Smart reload: only reload tabs that need it, prioritizing active/recent tabs
-const smartReloadTabs = (): Effect.Effect<void, never, never> =>
+const smartReloadTabs = () =>
   Effect.gen(function* () {
     // Query all HTTP/HTTPS tabs
     const tabs = yield* queryReloadableTabs()
@@ -196,7 +189,7 @@ const smartReloadTabs = (): Effect.Effect<void, never, never> =>
     )
   )
 
-const setupPostInstallReload = (): Effect.Effect<void, never, never> =>
+const setupPostInstallReload = () =>
   Effect.sync(() => {
     if (postInstallReloadRegistered) {
       return
@@ -347,7 +340,7 @@ const initialize = (): Effect.Effect<void, never, StorageService | MessagingServ
   })
 
 // Main execution
-const main = (): Effect.Effect<void, never, never> =>
+const main = () =>
   Effect.gen(function* () {
     yield* initialize().pipe(
       Effect.provide(MainLayer),
