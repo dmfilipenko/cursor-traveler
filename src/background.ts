@@ -72,8 +72,8 @@ const getTabPriority = (tab: chrome.tabs.Tab): number => {
     else if (hoursSinceAccess < 24) priority += 100 // Last 24 hours
   }
 
-  // Medium priority: visible (not hidden) tabs
-  if (!tab.hidden) priority += 50
+  // Medium priority: tabs that are currently loaded (not discarded)
+  if (tab.discarded !== true) priority += 50
 
   // Lower priority: pinned tabs (they're likely to stay open)
   if (tab.pinned) priority += 25
