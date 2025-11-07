@@ -57,33 +57,30 @@ const setupKeepalive = () =>
 
 let postInstallReloadRegistered = false
 
-// Check if content script is already loaded in a tab
-const checkContentScriptLoaded = (tabId: number) =>
-  Effect.async<boolean>((resume) => {
-    let responded = false
-
-    const respond = (value: boolean) => {
-      if (!responded) {
-        responded = true
-        resume(Effect.succeed(value))
-      }
-    }
-
-    try {
-      chrome.tabs.sendMessage(tabId, { type: HEALTH_CHECK_MESSAGE_TYPE }, (response) => {
-        if (chrome.runtime.lastError || !response || !response.loaded) {
-          respond(false)
+// Send message to tab and handle response
+const sendMessageToTab = (tabId: number, message: { type: string }) =>
+  Effect.tryPromise({
+    try: () => new Promise<{ loaded: boolean } | null>((resolve, reject) => {
+      chrome.tabs.sendMessage(tabId, message, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError)
         } else {
-          respond(true)
+          resolve(response || null)
         }
       })
-    } catch {
-      respond(false)
-    }
-
-    // Timeout if no response
-    setTimeout(() => respond(false), HEALTH_CHECK_TIMEOUT_MS)
+    }),
+    catch: () => null as { loaded: boolean } | null
   })
+
+// Check if content script is already loaded in a tab
+const checkContentScriptLoaded = (tabId: number) =>
+  Effect.race(
+    sendMessageToTab(tabId, { type: HEALTH_CHECK_MESSAGE_TYPE }),
+    Effect.sleep(HEALTH_CHECK_TIMEOUT_MS).pipe(Effect.as(null))
+  ).pipe(
+    Effect.map((response) => response?.loaded === true),
+    Effect.catchAll(() => Effect.succeed(false))
+  )
 
 // Determine reload priority: higher = more important
 const getTabPriority = (tab: chrome.tabs.Tab): number => {
@@ -145,10 +142,13 @@ const createTabWithPriority = (tab: chrome.tabs.Tab) =>
 
 // Reload a single tab with logging
 const reloadTab = (tabId: number, priority: number, url?: string) =>
-  Effect.sync(() => {
-    console.log(`[Smart Reload] Reloading tab ${tabId} (priority: ${priority}): ${url || 'unknown'}`)
-    chrome.tabs.reload(tabId)
-  })
+  Effect.sync(() => chrome.tabs.reload(tabId)).pipe(
+    Effect.tap(() =>
+      Effect.sync(() =>
+        console.log(`[Smart Reload] Reloading tab ${tabId} (priority: ${priority}): ${url || 'unknown'}`)
+      )
+    )
+  )
 
 // Smart reload: only reload tabs that need it, prioritizing active/recent tabs
 const smartReloadTabs = () =>
@@ -175,18 +175,21 @@ const smartReloadTabs = () =>
       { concurrency: 'unbounded' }
     )
 
-    // Log results
-    if (tabsToReload.length === 0) {
-      console.log('[Smart Reload] No tabs needed reloading - all content scripts already loaded!')
-    } else {
-      console.log(`[Smart Reload] Reloaded ${tabsToReload.length} of ${tabs.length} tabs`)
-    }
+    return { tabsToReload: tabsToReload.length, totalTabs: tabs.length }
   }).pipe(
-    Effect.catchAll((error) =>
-      Effect.sync(() => {
+    Effect.tap(({ tabsToReload, totalTabs }) =>
+      Effect.sync(() =>
+        tabsToReload === 0
+          ? console.log('[Smart Reload] No tabs needed reloading - all content scripts already loaded!')
+          : console.log(`[Smart Reload] Reloaded ${tabsToReload} of ${totalTabs} tabs`)
+      )
+    ),
+    Effect.tapError((error) =>
+      Effect.sync(() =>
         console.error('[Smart Reload] Error during smart reload:', error)
-      })
-    )
+      )
+    ),
+    Effect.catchAll(() => Effect.succeed(void 0))
   )
 
 const setupPostInstallReload = () =>
@@ -202,10 +205,17 @@ const setupPostInstallReload = () =>
       if (details.reason === chrome.runtime.OnInstalledReason.INSTALL ||
           details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
 
-        console.log(`[Smart Reload] Extension ${details.reason} detected, performing smart reload...`)
-
-        // Use smart reload with Effect runtime
-        Effect.runFork(smartReloadTabs())
+        // Use smart reload with Effect runtime and logging
+        Effect.runFork(
+          Effect.succeed(details.reason).pipe(
+            Effect.tap((reason) =>
+              Effect.sync(() =>
+                console.log(`[Smart Reload] Extension ${reason} detected, performing smart reload...`)
+              )
+            ),
+            Effect.flatMap(() => smartReloadTabs())
+          )
+        )
       }
     })
   })

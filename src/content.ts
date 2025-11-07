@@ -57,11 +57,12 @@ const processMouseMovements = () =>
         }
 
         yield* sendMessage(distanceMessage).pipe(
-          Effect.catchAll((error) => {
-            // Log error but don't stop the stream - extension should continue tracking
-            console.debug('Message send failed (extension still functional):', error)
-            return Effect.succeed(void 0)
-          })
+          Effect.tapError((error) =>
+            Effect.sync(() =>
+              console.debug('Message send failed (extension still functional):', error)
+            )
+          ),
+          Effect.catchAll(() => Effect.succeed(void 0))
         )
       })
     )
