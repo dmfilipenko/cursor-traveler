@@ -34,11 +34,7 @@ const setBadgeText = (text: string): Effect.Effect<void, BadgeError> =>
         cause: error,
       }),
   }).pipe(
-    Effect.tap(() =>
-      Effect.sync(() =>
-        console.log('🏷️ Badge: Set to:', text)
-      )
-    )
+    Effect.tap(() => Effect.log(`🏷️ Badge: Set to: ${text}`))
   )
 
 const getDisplayUnits = (

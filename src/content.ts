@@ -57,11 +57,7 @@ const processMouseMovements = () =>
         }
 
         yield* sendMessage(distanceMessage).pipe(
-          Effect.tapError((error) =>
-            Effect.sync(() =>
-              console.debug('Message send failed (extension still functional):', error)
-            )
-          ),
+          Effect.tapError((error) => Effect.logDebug('Message send failed (extension still functional):', error)),
           Effect.catchAll(() => Effect.succeed(void 0))
         )
       })

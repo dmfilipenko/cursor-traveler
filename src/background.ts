@@ -143,11 +143,7 @@ const createTabWithPriority = (tab: chrome.tabs.Tab) =>
 // Reload a single tab with logging
 const reloadTab = (tabId: number, priority: number, url?: string) =>
   Effect.sync(() => chrome.tabs.reload(tabId)).pipe(
-    Effect.tap(() =>
-      Effect.sync(() =>
-        console.log(`[Smart Reload] Reloading tab ${tabId} (priority: ${priority}): ${url || 'unknown'}`)
-      )
-    )
+    Effect.tap(() => Effect.log(`[Smart Reload] Reloading tab ${tabId} (priority: ${priority}): ${url || 'unknown'}`))
   )
 
 // Smart reload: only reload tabs that need it, prioritizing active/recent tabs
@@ -178,17 +174,11 @@ const smartReloadTabs = () =>
     return { tabsToReload: tabsToReload.length, totalTabs: tabs.length }
   }).pipe(
     Effect.tap(({ tabsToReload, totalTabs }) =>
-      Effect.sync(() =>
-        tabsToReload === 0
-          ? console.log('[Smart Reload] No tabs needed reloading - all content scripts already loaded!')
-          : console.log(`[Smart Reload] Reloaded ${tabsToReload} of ${totalTabs} tabs`)
-      )
+      tabsToReload === 0
+        ? Effect.log('[Smart Reload] No tabs needed reloading - all content scripts already loaded!')
+        : Effect.log(`[Smart Reload] Reloaded ${tabsToReload} of ${totalTabs} tabs`)
     ),
-    Effect.tapError((error) =>
-      Effect.sync(() =>
-        console.error('[Smart Reload] Error during smart reload:', error)
-      )
-    ),
+    Effect.tapError((error) => Effect.logError('[Smart Reload] Error during smart reload:', error)),
     Effect.catchAll(() => Effect.succeed(void 0))
   )
 
@@ -208,11 +198,7 @@ const setupPostInstallReload = () =>
         // Use smart reload with Effect runtime and logging
         Effect.runFork(
           Effect.succeed(details.reason).pipe(
-            Effect.tap((reason) =>
-              Effect.sync(() =>
-                console.log(`[Smart Reload] Extension ${reason} detected, performing smart reload...`)
-              )
-            ),
+            Effect.tap((reason) => Effect.log(`[Smart Reload] Extension ${reason} detected, performing smart reload...`)),
             Effect.flatMap(() => smartReloadTabs())
           )
         )
