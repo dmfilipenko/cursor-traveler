@@ -3,6 +3,14 @@ import { MouseTrackingServiceLive } from './services/mouse-tracking-service'
 import { ChromeMessage } from './domain/models'
 import { ChromeRuntimeError } from './domain/errors'
 
+// Constants for mouse movement processing
+const MOUSE_BUFFER_SIZE = 50 as const
+const MOUSE_BUFFER_WINDOW = "1 second" as const
+
+// Constants for health check
+const HEALTH_CHECK_MESSAGE_TYPE = 'ping' as const
+const HEALTH_CHECK_RESPONSE = { status: 'ok', loaded: true } as const
+
 // Direct Chrome messaging function with offline handling
 const sendMessage = <T = any>(message: ChromeMessage): Effect.Effect<T, ChromeRuntimeError> =>
   Effect.tryPromise({
@@ -31,15 +39,15 @@ const sendMessage = <T = any>(message: ChromeMessage): Effect.Effect<T, ChromeRu
 const processMouseMovements = (): Effect.Effect<void, ChromeRuntimeError, never> =>
   Effect.gen(function* () {
     const mouseStream = MouseTrackingServiceLive.createStream()
-    
-    const bufferedStream = Stream.groupedWithin(mouseStream, 50, "1 second").pipe(
+
+    const bufferedStream = Stream.groupedWithin(mouseStream, MOUSE_BUFFER_SIZE, MOUSE_BUFFER_WINDOW).pipe(
       Stream.map((chunk: Chunk.Chunk<number>) => {
         const movements = Chunk.toReadonlyArray(chunk)
         return EffectArray.reduce(movements, 0, (sum: number, value: number) => sum + value)
       }),
       Stream.catchAll(() => Stream.empty)
     )
-    
+
     yield* Stream.runForEach(bufferedStream, (total: number) =>
       Effect.gen(function* () {
         const distanceMessage: ChromeMessage = {
@@ -47,7 +55,7 @@ const processMouseMovements = (): Effect.Effect<void, ChromeRuntimeError, never>
           type: "distance",
           data: total
         }
-        
+
         yield* sendMessage(distanceMessage).pipe(
           Effect.catchAll((error) => {
             // Log error but don't stop the stream - extension should continue tracking
@@ -61,8 +69,8 @@ const processMouseMovements = (): Effect.Effect<void, ChromeRuntimeError, never>
 
 // Health check listener - responds to ping messages from background script
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === 'ping') {
-    sendResponse({ status: 'ok', loaded: true })
+  if (message.type === HEALTH_CHECK_MESSAGE_TYPE) {
+    sendResponse(HEALTH_CHECK_RESPONSE)
     return true // Keep channel open for async response
   }
   return false
