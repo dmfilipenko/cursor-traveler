@@ -31,6 +31,103 @@ const setupKeepalive = (): Effect.Effect<void, never, never> =>
 
 let postInstallReloadRegistered = false
 
+// Check if content script is already loaded in a tab
+const checkContentScriptLoaded = (tabId: number): Promise<boolean> =>
+  new Promise((resolve) => {
+    try {
+      chrome.tabs.sendMessage(tabId, { type: 'ping' }, (response) => {
+        // If we get a response and no error, content script is loaded
+        if (chrome.runtime.lastError || !response || !response.loaded) {
+          resolve(false)
+        } else {
+          resolve(true)
+        }
+      })
+    } catch {
+      resolve(false)
+    }
+
+    // Timeout after 100ms - if no response, assume not loaded
+    setTimeout(() => resolve(false), 100)
+  })
+
+// Tab priority for smart reloading
+interface TabWithPriority {
+  tab: chrome.tabs.Tab
+  priority: number
+  needsReload: boolean
+}
+
+// Determine reload priority: higher = more important
+const getTabPriority = (tab: chrome.tabs.Tab): number => {
+  let priority = 0
+
+  // Highest priority: active tab in current window
+  if (tab.active) priority += 1000
+
+  // High priority: recently accessed tabs (based on tab.lastAccessed if available)
+  if (tab.lastAccessed) {
+    const hoursSinceAccess = (Date.now() - tab.lastAccessed) / (1000 * 60 * 60)
+    if (hoursSinceAccess < 1) priority += 500      // Last hour
+    else if (hoursSinceAccess < 24) priority += 100 // Last 24 hours
+  }
+
+  // Medium priority: visible (not hidden) tabs
+  if (!tab.hidden) priority += 50
+
+  // Lower priority: pinned tabs (they're likely to stay open)
+  if (tab.pinned) priority += 25
+
+  return priority
+}
+
+// Smart reload: only reload tabs that need it, prioritizing active/recent tabs
+const smartReloadTabs = async (): Promise<void> => {
+  try {
+    // Query all HTTP/HTTPS tabs
+    const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] })
+
+    // Filter out restricted URLs and check which tabs need reloading
+    const tabsToCheck: TabWithPriority[] = []
+
+    for (const tab of tabs) {
+      if (typeof tab.id !== 'number' || isRestrictedUrl(tab.url)) {
+        continue
+      }
+
+      const priority = getTabPriority(tab)
+      const isLoaded = await checkContentScriptLoaded(tab.id)
+
+      tabsToCheck.push({
+        tab,
+        priority,
+        needsReload: !isLoaded
+      })
+    }
+
+    // Filter to only tabs that need reloading and sort by priority (highest first)
+    const tabsToReload = tabsToCheck
+      .filter(t => t.needsReload)
+      .sort((a, b) => b.priority - a.priority)
+
+    // Reload tabs in priority order
+    for (const { tab, priority } of tabsToReload) {
+      if (typeof tab.id === 'number') {
+        console.log(`[Smart Reload] Reloading tab ${tab.id} (priority: ${priority}): ${tab.url}`)
+        chrome.tabs.reload(tab.id)
+      }
+    }
+
+    if (tabsToReload.length === 0) {
+      console.log('[Smart Reload] No tabs needed reloading - all content scripts already loaded!')
+    } else {
+      console.log(`[Smart Reload] Reloaded ${tabsToReload.length} of ${tabs.length} tabs`)
+    }
+  } catch (error) {
+    console.error('[Smart Reload] Error during smart reload:', error)
+  }
+}
+
 const setupPostInstallReload = (): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
     if (postInstallReloadRegistered) {
@@ -40,14 +137,14 @@ const setupPostInstallReload = (): Effect.Effect<void, never, never> =>
     postInstallReloadRegistered = true
 
     chrome.runtime.onInstalled.addListener((details) => {
-      if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
-        chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] }, (tabs) => {
-          tabs.forEach((tab) => {
-            if (typeof tab.id === 'number' && !isRestrictedUrl(tab.url)) {
-              chrome.tabs.reload(tab.id)
-            }
-          })
-        })
+      // Handle both INSTALL and UPDATE events
+      if (details.reason === chrome.runtime.OnInstalledReason.INSTALL ||
+          details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
+
+        console.log(`[Smart Reload] Extension ${details.reason} detected, performing smart reload...`)
+
+        // Use smart reload instead of reloading all tabs
+        smartReloadTabs()
       }
     })
   })

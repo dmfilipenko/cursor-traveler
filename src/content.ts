@@ -59,6 +59,15 @@ const processMouseMovements = (): Effect.Effect<void, ChromeRuntimeError, never>
     )
   })
 
+// Health check listener - responds to ping messages from background script
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === 'ping') {
+    sendResponse({ status: 'ok', loaded: true })
+    return true // Keep channel open for async response
+  }
+  return false
+})
+
 // Auto-start when script loads
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => Effect.runFork(processMouseMovements()))
